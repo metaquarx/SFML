@@ -44,7 +44,6 @@ namespace priv
 class RenderTextureImpl
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///

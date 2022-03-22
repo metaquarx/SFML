@@ -2,11 +2,12 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+
 #include <cmath>
-#include <ctime>
 #include <cstdlib>
+#include <ctime>
 
 #ifdef SFML_SYSTEM_IOS
 #include <SFML/Main.hpp>
@@ -32,13 +33,14 @@ int main()
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // Define some constants
-    const float gameWidth = 800;
-    const float gameHeight = 600;
+    const float  gameWidth  = 800;
+    const float  gameHeight = 600;
     sf::Vector2f paddleSize(25, 100);
-    float ballRadius = 10.f;
+    float        ballRadius = 10.f;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(static_cast<unsigned int>(gameWidth), static_cast<unsigned int>(gameHeight), 32), "SFML Tennis",
+    sf::RenderWindow window(sf::VideoMode(static_cast<unsigned int>(gameWidth), static_cast<unsigned int>(gameHeight), 32),
+                            "SFML Tennis",
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -50,7 +52,7 @@ int main()
 
     // Create the SFML logo texture:
     sf::Texture sfmlLogoTexture;
-    if(!sfmlLogoTexture.loadFromFile(resourcesDir() / "sfml_logo.png"))
+    if (!sfmlLogoTexture.loadFromFile(resourcesDir() / "sfml_logo.png"))
         return EXIT_FAILURE;
     sf::Sprite sfmlLogo;
     sfmlLogo.setTexture(sfmlLogoTexture);
@@ -92,22 +94,22 @@ int main()
     pauseMessage.setPosition({170.f, 200.f});
     pauseMessage.setFillColor(sf::Color::White);
 
-    #ifdef SFML_SYSTEM_IOS
+#ifdef SFML_SYSTEM_IOS
     pauseMessage.setString("Welcome to SFML Tennis!\nTouch the screen to start the game.");
-    #else
+#else
     pauseMessage.setString("Welcome to SFML Tennis!\n\nPress space to start the game.");
-    #endif
+#endif
 
     // Define the paddles properties
-    sf::Clock AITimer;
-    const sf::Time AITime   = sf::seconds(0.1f);
-    const float paddleSpeed = 400.f;
-    float rightPaddleSpeed  = 0.f;
-    const float ballSpeed   = 400.f;
-    sf::Angle ballAngle     = sf::degrees(0); // to be changed later
+    sf::Clock      AITimer;
+    const sf::Time AITime           = sf::seconds(0.1f);
+    const float    paddleSpeed      = 400.f;
+    float          rightPaddleSpeed = 0.f;
+    const float    ballSpeed        = 400.f;
+    sf::Angle      ballAngle        = sf::degrees(0); // to be changed later
 
     sf::Clock clock;
-    bool isPlaying = false;
+    bool      isPlaying = false;
     while (window.isOpen())
     {
         // Handle events
@@ -116,7 +118,7 @@ int main()
         {
             // Window closed or escape key pressed: exit
             if ((event.type == sf::Event::Closed) ||
-               ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
+                ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
             {
                 window.close();
                 break;
@@ -142,8 +144,7 @@ int main()
                     {
                         // Make sure the ball initial angle is not too much vertical
                         ballAngle = sf::degrees(static_cast<float>(std::rand() % 360));
-                    }
-                    while (std::abs(std::cos(ballAngle.asRadians())) < 0.7f);
+                    } while (std::abs(std::cos(ballAngle.asRadians())) < 0.7f);
                 }
             }
 
@@ -162,20 +163,19 @@ int main()
             float deltaTime = clock.restart().asSeconds();
 
             // Move the player's paddle
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
-               (leftPaddle.getPosition().y - paddleSize.y / 2 > 5.f))
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && (leftPaddle.getPosition().y - paddleSize.y / 2 > 5.f))
             {
                 leftPaddle.move({0.f, -paddleSpeed * deltaTime});
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-               (leftPaddle.getPosition().y + paddleSize.y / 2 < gameHeight - 5.f))
+                (leftPaddle.getPosition().y + paddleSize.y / 2 < gameHeight - 5.f))
             {
                 leftPaddle.move({0.f, paddleSpeed * deltaTime});
             }
 
             if (sf::Touch::isDown(0))
             {
-                sf::Vector2i pos = sf::Touch::getPosition(0);
+                sf::Vector2i pos       = sf::Touch::getPosition(0);
                 sf::Vector2f mappedPos = window.mapPixelToCoords(pos);
                 leftPaddle.setPosition({leftPaddle.getPosition().x, mappedPos.y});
             }
@@ -203,11 +203,11 @@ int main()
             float factor = ballSpeed * deltaTime;
             ball.move({std::cos(ballAngle.asRadians()) * factor, std::sin(ballAngle.asRadians()) * factor});
 
-            #ifdef SFML_SYSTEM_IOS
+#ifdef SFML_SYSTEM_IOS
             const std::string inputString = "Touch the screen to restart.";
-            #else
+#else
             const std::string inputString = "Press space to restart or\nescape to exit.";
-            #endif
+#endif
 
             // Check collisions between the ball and the screen
             if (ball.getPosition().x - ballRadius < 0.f)

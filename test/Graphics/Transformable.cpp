@@ -1,8 +1,9 @@
 #include <SFML/Graphics/Transformable.hpp>
-#include "GraphicsUtil.hpp"
-#include "SystemUtil.hpp"
 
 #include <doctest.h>
+
+#include "GraphicsUtil.hpp"
+#include "SystemUtil.hpp"
 
 using doctest::Approx;
 

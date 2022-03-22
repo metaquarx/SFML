@@ -32,23 +32,24 @@
 
 #if defined(SFML_SYSTEM_WINDOWS)
 
-    #include <SFML/Window/Win32/CursorImpl.hpp>
+#include <SFML/Window/Win32/CursorImpl.hpp>
 
-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
+#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || \
+    defined(SFML_SYSTEM_NETBSD)
 
-    #include <SFML/Window/Unix/CursorImpl.hpp>
+#include <SFML/Window/Unix/CursorImpl.hpp>
 
 #elif defined(SFML_SYSTEM_MACOS)
 
-    #include <SFML/Window/OSX/CursorImpl.hpp>
+#include <SFML/Window/OSX/CursorImpl.hpp>
 
 #elif defined(SFML_SYSTEM_IOS)
 
-    #include <SFML/Window/iOS/CursorImpl.hpp>
+#include <SFML/Window/iOS/CursorImpl.hpp>
 
 #elif defined(SFML_SYSTEM_ANDROID)
 
-    #include <SFML/Window/Android/CursorImpl.hpp>
+#include <SFML/Window/Android/CursorImpl.hpp>
 
 #endif
 

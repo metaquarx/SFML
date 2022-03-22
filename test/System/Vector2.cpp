@@ -1,8 +1,9 @@
 #include <SFML/System/Vector2.hpp>
-#include "SystemUtil.hpp"
-#include <type_traits>
 
 #include <doctest.h>
+#include <type_traits>
+
+#include "SystemUtil.hpp"
 
 using namespace sf::Literals;
 using doctest::Approx;
@@ -53,7 +54,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
 
     SUBCASE("Arithmetic operations between two vectors")
     {
-        sf::Vector2i firstVector(2, 5);
+        sf::Vector2i       firstVector(2, 5);
         const sf::Vector2i secondVector(8, 3);
 
         SUBCASE("vector += vector")
@@ -92,7 +93,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
     SUBCASE("Arithmetic operations between vector and scalar value")
     {
         sf::Vector2i vector(26, 12);
-        int scalar = 2;
+        int          scalar = 2;
 
         SUBCASE("vector * scalar")
         {
@@ -198,7 +199,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
         CHECK(v.normalized() == ApproxVec(0.624695, 0.780869));
 
         const sf::Vector2f w(-0.7f, -2.2f);
-        
+
         CHECK(w.length() == Approx(2.30868));
         CHECK(w.lengthSq() == Approx(5.3300033));
         CHECK(w.normalized() == ApproxVec(-0.303204, -0.952926));
@@ -207,7 +208,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
     SUBCASE("Rotations and angles")
     {
         const sf::Vector2f v(2.4f, 3.0f);
-        
+
         CHECK(v.angle() == ApproxDeg(51.3402));
         CHECK(sf::Vector2f::UnitX.angleTo(v) == ApproxDeg(51.3402));
         CHECK(sf::Vector2f::UnitY.angleTo(v) == ApproxDeg(-38.6598));
@@ -222,7 +223,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
         CHECK(w.angleTo(v) == ApproxDeg(158.9902));
 
         const float ratio = w.length() / v.length();
-        CHECK(v.rotatedBy(-158.9902_deg) * ratio  == ApproxVec(w));
+        CHECK(v.rotatedBy(-158.9902_deg) * ratio == ApproxVec(w));
         CHECK(w.rotatedBy(158.9902_deg) / ratio == ApproxVec(v));
 
         CHECK(v.perpendicular() == sf::Vector2f(-3.0f, 2.4f));
@@ -232,7 +233,7 @@ TEST_CASE("sf::Vector2 class template - [system]")
         CHECK(v.rotatedBy(27.14_deg) == ApproxVec(0.767248, 3.76448));
         CHECK(v.rotatedBy(-36.11_deg) == ApproxVec(3.70694, 1.00925));
     }
-    
+
     SUBCASE("Products and quotients")
     {
         const sf::Vector2f v(2.4f, 3.0f);
@@ -243,18 +244,18 @@ TEST_CASE("sf::Vector2 class template - [system]")
 
         CHECK(v.cross(w) == Approx(-3.18));
         CHECK(w.cross(v) == Approx(+3.18));
-        
+
         CHECK(v.cwiseMul(w) == ApproxVec(-1.68, -6.6));
         CHECK(w.cwiseMul(v) == ApproxVec(-1.68, -6.6));
         CHECK(v.cwiseDiv(w) == ApproxVec(-3.428571, -1.363636));
         CHECK(w.cwiseDiv(v) == ApproxVec(-0.291666, -0.733333));
     }
-    
+
     SUBCASE("Projection")
     {
         const sf::Vector2f v(2.4f, 3.0f);
         const sf::Vector2f w(-0.7f, -2.2f);
-        
+
         CHECK(v.projectedOnto(w) == ApproxVec(1.087430, 3.417636));
         CHECK(v.projectedOnto(w) == ApproxVec(-1.55347f * w));
 

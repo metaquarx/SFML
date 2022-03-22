@@ -16,37 +16,39 @@
 // String conversions for doctest framework
 namespace sf
 {
-    class Angle;
-    class String;
-    class Time;
+class Angle;
+class String;
+class Time;
 
-    std::ostream& operator <<(std::ostream& os, const sf::Angle& angle);
-    std::ostream& operator <<(std::ostream& os, const sf::String& string);
-    std::ostream& operator <<(std::ostream& os, sf::Time time);
+std::ostream& operator<<(std::ostream& os, const sf::Angle& angle);
+std::ostream& operator<<(std::ostream& os, const sf::String& string);
+std::ostream& operator<<(std::ostream& os, sf::Time time);
 
-    template <typename T>
-    std::ostream& operator <<(std::ostream& os, const sf::Vector2<T>& vector)
-    {
-        os << "(" << vector.x << ", " << vector.y << ")";
-        return os;
-    }
-
-    template <typename T>
-    std::ostream& operator <<(std::ostream& os, const sf::Vector3<T>& vector)
-    {
-        os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
-        return os;
-    }
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const sf::Vector2<T>& vector)
+{
+    os << "(" << vector.x << ", " << vector.y << ")";
+    return os;
 }
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const sf::Vector3<T>& vector)
+{
+    os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+    return os;
+}
+} // namespace sf
 
 // Utilities for approximate equality
 struct ApproxVec
 {
-    ApproxVec(double x, double y)
-        : vector(static_cast<float>(x), static_cast<float>(y)) {}
+    ApproxVec(double x, double y) : vector(static_cast<float>(x), static_cast<float>(y))
+    {
+    }
 
-    explicit ApproxVec(const sf::Vector2f& v)
-        : vector(v) {}
+    explicit ApproxVec(const sf::Vector2f& v) : vector(v)
+    {
+    }
 
     sf::Vector2f vector;
 };
@@ -54,8 +56,9 @@ struct ApproxVec
 // Utilities for approximate equality
 struct ApproxDeg
 {
-    ApproxDeg(double degrees)
-        : degrees(static_cast<float>(degrees)) {}
+    ApproxDeg(double degrees) : degrees(static_cast<float>(degrees))
+    {
+    }
 
     float degrees;
 };
@@ -63,30 +66,30 @@ struct ApproxDeg
 bool operator==(const sf::Vector2f& lhs, const ApproxVec& rhs);
 bool operator==(const sf::Angle& lhs, const ApproxDeg& rhs);
 
-std::ostream& operator <<(std::ostream& os, const ApproxVec& approx);
-std::ostream& operator <<(std::ostream& os, const ApproxDeg& approx);
+std::ostream& operator<<(std::ostream& os, const ApproxVec& approx);
+std::ostream& operator<<(std::ostream& os, const ApproxDeg& approx);
 
 namespace sf::Testing
 {
-    class TemporaryFile
-    {
-    private:
-        std::string m_path;
+class TemporaryFile
+{
+private:
+    std::string m_path;
 
-    public:
-        // Create a temporary file with a randomly generated path, containing 'contents'.
-        TemporaryFile(const std::string& contents);
+public:
+    // Create a temporary file with a randomly generated path, containing 'contents'.
+    TemporaryFile(const std::string& contents);
 
-        // Close and delete the generated file.
-        ~TemporaryFile();
+    // Close and delete the generated file.
+    ~TemporaryFile();
 
-        // Prevent copies.
-        TemporaryFile(const TemporaryFile&) = delete;
-        TemporaryFile& operator=(const TemporaryFile&) = delete;
+    // Prevent copies.
+    TemporaryFile(const TemporaryFile&) = delete;
+    TemporaryFile& operator=(const TemporaryFile&) = delete;
 
-        // Return the randomly generated path.
-        const std::string& getPath() const;
-    };
-}
+    // Return the randomly generated path.
+    const std::string& getPath() const;
+};
+} // namespace sf::Testing
 
 #endif // SFML_TESTUTILITIES_SYSTEM_HPP

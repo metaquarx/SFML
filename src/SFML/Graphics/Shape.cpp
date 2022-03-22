@@ -25,24 +25,25 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/Shape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Shape.hpp>
 #include <SFML/Graphics/Texture.hpp>
+
 #include <cmath>
 
 
 namespace
 {
-    // Compute the normal of a segment
-    sf::Vector2f computeNormal(const sf::Vector2f& p1, const sf::Vector2f& p2)
-    {
-        sf::Vector2f normal = (p2 - p1).perpendicular();
-        float length = normal.length();
-        if (length != 0.f)
-            normal /= length;
-        return normal;
-    }
+// Compute the normal of a segment
+sf::Vector2f computeNormal(const sf::Vector2f& p1, const sf::Vector2f& p2)
+{
+    sf::Vector2f normal = (p2 - p1).perpendicular();
+    float        length = normal.length();
+    if (length != 0.f)
+        normal /= length;
+    return normal;
 }
+} // namespace
 
 
 namespace sf
@@ -150,16 +151,16 @@ FloatRect Shape::getGlobalBounds() const
 
 
 ////////////////////////////////////////////////////////////
-Shape::Shape() :
-m_texture         (nullptr),
-m_textureRect     (),
-m_fillColor       (255, 255, 255),
-m_outlineColor    (255, 255, 255),
-m_outlineThickness(0),
-m_vertices        (TriangleFan),
-m_outlineVertices (TriangleStrip),
-m_insideBounds    (),
-m_bounds          ()
+Shape::Shape()
+: m_texture(nullptr)
+, m_textureRect()
+, m_fillColor(255, 255, 255)
+, m_outlineColor(255, 255, 255)
+, m_outlineThickness(0)
+, m_vertices(TriangleFan)
+, m_outlineVertices(TriangleStrip)
+, m_insideBounds()
+, m_bounds()
 {
 }
 
@@ -179,12 +180,11 @@ void Shape::update()
     m_vertices.resize(count + 2); // + 2 for center and repeated first point
 
     // Position
-    for (std::size_t i = 0; i < count; ++i)
-        m_vertices[i + 1].position = getPoint(i);
+    for (std::size_t i = 0; i < count; ++i) m_vertices[i + 1].position = getPoint(i);
     m_vertices[count + 1].position = m_vertices[1].position;
 
     // Update the bounding rectangle
-    m_vertices[0] = m_vertices[1]; // so that the result of getBounds() is correct
+    m_vertices[0]  = m_vertices[1]; // so that the result of getBounds() is correct
     m_insideBounds = m_vertices.getBounds();
 
     // Compute the center and make it the first vertex
@@ -225,8 +225,7 @@ void Shape::draw(RenderTarget& target, const RenderStates& states) const
 ////////////////////////////////////////////////////////////
 void Shape::updateFillColors()
 {
-    for (std::size_t i = 0; i < m_vertices.getVertexCount(); ++i)
-        m_vertices[i].color = m_fillColor;
+    for (std::size_t i = 0; i < m_vertices.getVertexCount(); ++i) m_vertices[i].color = m_fillColor;
 }
 
 
@@ -238,7 +237,8 @@ void Shape::updateTexCoords()
     for (std::size_t i = 0; i < m_vertices.getVertexCount(); ++i)
     {
         float xratio = m_insideBounds.width > 0 ? (m_vertices[i].position.x - m_insideBounds.left) / m_insideBounds.width : 0;
-        float yratio = m_insideBounds.height > 0 ? (m_vertices[i].position.y - m_insideBounds.top) / m_insideBounds.height : 0;
+        float yratio = m_insideBounds.height > 0 ? (m_vertices[i].position.y - m_insideBounds.top) / m_insideBounds.height
+                                                 : 0;
         m_vertices[i].texCoords.x = convertedTextureRect.left + convertedTextureRect.width * xratio;
         m_vertices[i].texCoords.y = convertedTextureRect.top + convertedTextureRect.height * yratio;
     }
@@ -280,7 +280,7 @@ void Shape::updateOutline()
             n2 = -n2;
 
         // Combine them to get the extrusion direction
-        float factor = 1.f + (n1.x * n2.x + n1.y * n2.y);
+        float    factor = 1.f + (n1.x * n2.x + n1.y * n2.y);
         Vector2f normal = (n1 + n2) / factor;
 
         // Update the outline points
@@ -303,8 +303,7 @@ void Shape::updateOutline()
 ////////////////////////////////////////////////////////////
 void Shape::updateOutlineColors()
 {
-    for (std::size_t i = 0; i < m_outlineVertices.getVertexCount(); ++i)
-        m_outlineVertices[i].color = m_outlineColor;
+    for (std::size_t i = 0; i < m_outlineVertices.getVertexCount(); ++i) m_outlineVertices[i].color = m_outlineColor;
 }
 
 } // namespace sf

@@ -29,8 +29,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Network/Export.hpp>
-#include <SFML/Network/Socket.hpp>
+
 #include <SFML/Network/IpAddress.hpp>
+#include <SFML/Network/Socket.hpp>
+
 #include <vector>
 
 
@@ -45,7 +47,6 @@ class Packet;
 class SFML_NETWORK_API UdpSocket : public Socket
 {
 public:
-
     ////////////////////////////////////////////////////////////
     // Constants
     ////////////////////////////////////////////////////////////
@@ -152,7 +153,8 @@ public:
     /// \see send
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Status receive(void* data, std::size_t size, std::size_t& received, IpAddress& remoteAddress, unsigned short& remotePort);
+    [[nodiscard]] Status
+        receive(void* data, std::size_t size, std::size_t& received, IpAddress& remoteAddress, unsigned short& remotePort);
 
     ////////////////////////////////////////////////////////////
     /// \brief Send a formatted packet of data to a remote peer
@@ -190,7 +192,6 @@ public:
     [[nodiscard]] Status receive(Packet& packet, IpAddress& remoteAddress, unsigned short& remotePort);
 
 private:
-
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////

@@ -32,7 +32,8 @@
 #include <SFML/Window/Win32/VulkanImplWin32.hpp>
 using VulkanImplType = sf::priv::VulkanImplWin32;
 
-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
+#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || \
+    defined(SFML_SYSTEM_NETBSD)
 
 #include <SFML/Window/Unix/VulkanImplX11.hpp>
 using VulkanImplType = sf::priv::VulkanImplX11;
@@ -51,7 +52,7 @@ bool Vulkan::isAvailable(bool requireGraphics)
 {
 #if defined(SFML_VULKAN_IMPLEMENTATION_NOT_AVAILABLE)
 
-    (void) requireGraphics;
+    (void)requireGraphics;
     return false;
 
 #else
@@ -67,7 +68,7 @@ VulkanFunctionPointer Vulkan::getFunction(const char* name)
 {
 #if defined(SFML_VULKAN_IMPLEMENTATION_NOT_AVAILABLE)
 
-    (void) name;
+    (void)name;
     return nullptr;
 
 #else

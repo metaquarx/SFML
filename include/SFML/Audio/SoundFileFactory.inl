@@ -31,12 +31,20 @@ namespace sf
 {
 namespace priv
 {
-    template <typename T> std::unique_ptr<SoundFileReader> createReader() { return std::make_unique<T>(); }
-    template <typename T> std::unique_ptr<SoundFileWriter> createWriter() { return std::make_unique<T>(); }
+template<typename T>
+std::unique_ptr<SoundFileReader> createReader()
+{
+    return std::make_unique<T>();
 }
+template<typename T>
+std::unique_ptr<SoundFileWriter> createWriter()
+{
+    return std::make_unique<T>();
+}
+} // namespace priv
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 void SoundFileFactory::registerReader()
 {
     // Make sure the same class won't be registered twice
@@ -44,7 +52,7 @@ void SoundFileFactory::registerReader()
 
     // Create a new factory with the functions provided by the class
     ReaderFactory factory;
-    factory.check = &T::check;
+    factory.check  = &T::check;
     factory.create = &priv::createReader<T>;
 
     // Add it
@@ -53,7 +61,7 @@ void SoundFileFactory::registerReader()
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 void SoundFileFactory::unregisterReader()
 {
     // Remove the instance(s) of the reader from the array of factories
@@ -67,7 +75,7 @@ void SoundFileFactory::unregisterReader()
 }
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 void SoundFileFactory::registerWriter()
 {
     // Make sure the same class won't be registered twice
@@ -75,7 +83,7 @@ void SoundFileFactory::registerWriter()
 
     // Create a new factory with the functions provided by the class
     WriterFactory factory;
-    factory.check = &T::check;
+    factory.check  = &T::check;
     factory.create = &priv::createWriter<T>;
 
     // Add it
@@ -84,7 +92,7 @@ void SoundFileFactory::registerWriter()
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 void SoundFileFactory::unregisterWriter()
 {
     // Remove the instance(s) of the writer from the array of factories

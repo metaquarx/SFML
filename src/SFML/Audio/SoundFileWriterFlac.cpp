@@ -28,9 +28,10 @@
 #include <SFML/Audio/SoundFileWriterFlac.hpp>
 #include <SFML/System/Err.hpp>
 #include <SFML/System/Utils.hpp>
+
 #include <algorithm>
-#include <cctype>
 #include <cassert>
+#include <cctype>
 #include <ostream>
 
 
@@ -46,10 +47,7 @@ bool SoundFileWriterFlac::check(const std::filesystem::path& filename)
 
 
 ////////////////////////////////////////////////////////////
-SoundFileWriterFlac::SoundFileWriterFlac() :
-m_encoder     (nullptr),
-m_channelCount(0),
-m_samples32   ()
+SoundFileWriterFlac::SoundFileWriterFlac() : m_encoder(nullptr), m_channelCount(0), m_samples32()
 {
 }
 
@@ -78,7 +76,8 @@ bool SoundFileWriterFlac::open(const std::filesystem::path& filename, unsigned i
     FLAC__stream_encoder_set_sample_rate(m_encoder, sampleRate);
 
     // Initialize the output stream
-    if (FLAC__stream_encoder_init_file(m_encoder, filename.string().c_str(), nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+    if (FLAC__stream_encoder_init_file(m_encoder, filename.string().c_str(), nullptr, nullptr) !=
+        FLAC__STREAM_ENCODER_INIT_STATUS_OK)
     {
         err() << "Failed to write flac file " << filename << " (failed to open the file)" << std::endl;
         close();

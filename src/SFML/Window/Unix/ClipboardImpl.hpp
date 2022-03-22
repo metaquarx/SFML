@@ -29,7 +29,9 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/System/String.hpp>
+
 #include <X11/Xlib.h>
+
 #include <deque>
 
 
@@ -45,7 +47,6 @@ namespace priv
 class ClipboardImpl
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Get the content of the clipboard as string data
     ///
@@ -81,7 +82,6 @@ public:
     static void processEvents();
 
 private:
-
     ////////////////////////////////////////////////////////////
     /// \brief Constructor
     ///

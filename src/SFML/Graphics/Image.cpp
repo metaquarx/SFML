@@ -29,27 +29,24 @@
 #include <SFML/Graphics/ImageLoader.hpp>
 #include <SFML/System/Err.hpp>
 #ifdef SFML_SYSTEM_ANDROID
-    #include <SFML/System/Android/ResourceStream.hpp>
+#include <SFML/System/Android/ResourceStream.hpp>
 #endif
 #include <algorithm>
-#include <ostream>
 #include <cstring>
+#include <ostream>
 
 
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-Image::Image() :
-m_size(0, 0)
+Image::Image() : m_size(0, 0)
 {
-
 }
 
 
 ////////////////////////////////////////////////////////////
 Image::~Image()
 {
-
 }
 
 
@@ -137,16 +134,16 @@ void Image::create(unsigned int width, unsigned int height, const Uint8* pixels)
 ////////////////////////////////////////////////////////////
 bool Image::loadFromFile(const std::filesystem::path& filename)
 {
-    #ifndef SFML_SYSTEM_ANDROID
+#ifndef SFML_SYSTEM_ANDROID
 
-        return priv::ImageLoader::getInstance().loadImageFromFile(filename, m_pixels, m_size);
+    return priv::ImageLoader::getInstance().loadImageFromFile(filename, m_pixels, m_size);
 
-    #else
+#else
 
-        priv::ResourceStream stream(filename);
-        return loadFromStream(stream);
+    priv::ResourceStream stream(filename);
+    return loadFromStream(stream);
 
-    #endif
+#endif
 }
 
 
@@ -221,17 +218,23 @@ void Image::copy(const Image& source, unsigned int destX, unsigned int destY, co
     }
     else
     {
-        if (srcRect.left   < 0) srcRect.left = 0;
-        if (srcRect.top    < 0) srcRect.top  = 0;
-        if (srcRect.width  > static_cast<int>(source.m_size.x)) srcRect.width  = static_cast<int>(source.m_size.x);
-        if (srcRect.height > static_cast<int>(source.m_size.y)) srcRect.height = static_cast<int>(source.m_size.y);
+        if (srcRect.left < 0)
+            srcRect.left = 0;
+        if (srcRect.top < 0)
+            srcRect.top = 0;
+        if (srcRect.width > static_cast<int>(source.m_size.x))
+            srcRect.width = static_cast<int>(source.m_size.x);
+        if (srcRect.height > static_cast<int>(source.m_size.y))
+            srcRect.height = static_cast<int>(source.m_size.y);
     }
 
     // Then find the valid bounds of the destination rectangle
     auto width  = static_cast<unsigned int>(srcRect.width);
     auto height = static_cast<unsigned int>(srcRect.height);
-    if (destX + width  > m_size.x) width  = m_size.x - destX;
-    if (destY + height > m_size.y) height = m_size.y - destY;
+    if (destX + width > m_size.x)
+        width = m_size.x - destX;
+    if (destY + height > m_size.y)
+        height = m_size.y - destY;
 
     // Make sure the destination area is valid
     if ((width <= 0) || (height <= 0))
@@ -242,8 +245,10 @@ void Image::copy(const Image& source, unsigned int destX, unsigned int destY, co
     unsigned int rows      = height;
     int          srcStride = static_cast<int>(source.m_size.x) * 4;
     int          dstStride = static_cast<int>(m_size.x) * 4;
-    const Uint8* srcPixels = source.m_pixels.data() + (static_cast<unsigned int>(srcRect.left) + static_cast<unsigned int>(srcRect.top) * source.m_size.x) * 4;
-    Uint8*       dstPixels = m_pixels.data() + (destX + destY * m_size.x) * 4;
+    const Uint8* srcPixels = source.m_pixels.data() + (static_cast<unsigned int>(srcRect.left) +
+                                                       static_cast<unsigned int>(srcRect.top) * source.m_size.x) *
+                                                          4;
+    Uint8* dstPixels = m_pixels.data() + (destX + destY * m_size.x) * 4;
 
     // Copy the pixels
     if (applyAlpha)
@@ -259,10 +264,10 @@ void Image::copy(const Image& source, unsigned int destX, unsigned int destY, co
 
                 // Interpolate RGBA components using the alpha value of the source pixel
                 Uint8 alpha = src[3];
-                dst[0] = static_cast<Uint8>((src[0] * alpha + dst[0] * (255 - alpha)) / 255);
-                dst[1] = static_cast<Uint8>((src[1] * alpha + dst[1] * (255 - alpha)) / 255);
-                dst[2] = static_cast<Uint8>((src[2] * alpha + dst[2] * (255 - alpha)) / 255);
-                dst[3] = static_cast<Uint8>(alpha + dst[3] * (255 - alpha) / 255);
+                dst[0]      = static_cast<Uint8>((src[0] * alpha + dst[0] * (255 - alpha)) / 255);
+                dst[1]      = static_cast<Uint8>((src[1] * alpha + dst[1] * (255 - alpha)) / 255);
+                dst[2]      = static_cast<Uint8>((src[2] * alpha + dst[2] * (255 - alpha)) / 255);
+                dst[3]      = static_cast<Uint8>(alpha + dst[3] * (255 - alpha) / 255);
             }
 
             srcPixels += srcStride;
@@ -286,10 +291,10 @@ void Image::copy(const Image& source, unsigned int destX, unsigned int destY, co
 void Image::setPixel(unsigned int x, unsigned int y, const Color& color)
 {
     Uint8* pixel = &m_pixels[(x + y * m_size.x) * 4];
-    *pixel++ = color.r;
-    *pixel++ = color.g;
-    *pixel++ = color.b;
-    *pixel++ = color.a;
+    *pixel++     = color.r;
+    *pixel++     = color.g;
+    *pixel++     = color.b;
+    *pixel++     = color.a;
 }
 
 
@@ -325,8 +330,9 @@ void Image::flipHorizontally()
 
         for (std::size_t y = 0; y < m_size.y; ++y)
         {
-            auto left = m_pixels.begin() + static_cast<std::vector<Uint8>::iterator::difference_type>(y * rowSize);
-            auto right = m_pixels.begin() + static_cast<std::vector<Uint8>::iterator::difference_type>((y + 1) * rowSize - 4);
+            auto left  = m_pixels.begin() + static_cast<std::vector<Uint8>::iterator::difference_type>(y * rowSize);
+            auto right = m_pixels.begin() +
+                         static_cast<std::vector<Uint8>::iterator::difference_type>((y + 1) * rowSize - 4);
 
             for (std::size_t x = 0; x < m_size.x / 2; ++x)
             {
@@ -347,7 +353,7 @@ void Image::flipVertically()
     {
         auto rowSize = static_cast<std::vector<Uint8>::iterator::difference_type>(m_size.x * 4);
 
-        auto top = m_pixels.begin();
+        auto top    = m_pixels.begin();
         auto bottom = m_pixels.end() - rowSize;
 
         for (std::size_t y = 0; y < m_size.y / 2; ++y)

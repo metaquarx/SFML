@@ -29,7 +29,9 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Export.hpp>
+
 #include <SFML/Window/GlResource.hpp>
+
 #include <memory>
 
 
@@ -37,7 +39,7 @@ namespace sf
 {
 namespace priv
 {
-    class GlContext;
+class GlContext;
 }
 
 struct ContextSettings;
@@ -51,7 +53,6 @@ using GlFunctionPointer = void (*)();
 class SFML_WINDOW_API Context : GlResource
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -159,7 +160,6 @@ public:
     Context(const ContextSettings& settings, unsigned int width, unsigned int height);
 
 private:
-
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////

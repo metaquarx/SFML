@@ -34,12 +34,11 @@
 
 namespace sf
 {
-    [[nodiscard]] inline std::string toLower(std::string str)
-    {
-        for (char& c : str)
-            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-        return str;
-    }
+[[nodiscard]] inline std::string toLower(std::string str)
+{
+    for (char& c : str) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return str;
+}
 } // namespace sf
 
 #endif // SFML_UTILS_HPP

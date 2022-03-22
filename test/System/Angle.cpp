@@ -1,7 +1,8 @@
 #include <SFML/System/Angle.hpp>
-#include "SystemUtil.hpp"
 
 #include <doctest.h>
+
+#include "SystemUtil.hpp"
 
 using doctest::Approx;
 
@@ -276,22 +277,21 @@ TEST_CASE("sf::Angle class - [system]")
             using namespace sf::Literals;
             CHECK(0.0_rad == sf::Angle::Zero);
             CHECK(1.0_rad == sf::radians(1));
-            CHECK(-1.0_rad ==sf::radians(-1));
+            CHECK(-1.0_rad == sf::radians(-1));
             CHECK(3.14_rad == sf::radians(3.14f));
             CHECK(-3.14_rad == sf::radians(-3.14f));
 
             CHECK(0_rad == sf::Angle::Zero);
             CHECK(1_rad == sf::radians(1));
             CHECK(-1_rad == sf::radians(-1));
-            CHECK(100_rad ==sf::radians(100));
-            CHECK(-100_rad ==sf::radians(-100));
+            CHECK(100_rad == sf::radians(100));
+            CHECK(-100_rad == sf::radians(-100));
         }
     }
 
     SUBCASE("Constexpr support")
     {
-        constexpr auto result = []
-        {
+        constexpr auto result = [] {
             sf::Angle angle = sf::degrees(9);
             angle %= sf::degrees(2);
             return angle;

@@ -3,6 +3,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Network.hpp>
+
 #include <fstream>
 #include <iostream>
 
@@ -11,7 +12,7 @@
 /// Print a FTP response into a standard output stream
 ///
 ////////////////////////////////////////////////////////////
-std::ostream& operator <<(std::ostream& stream, const sf::Ftp::Response& response)
+std::ostream& operator<<(std::ostream& stream, const sf::Ftp::Response& response)
 {
     return stream << response.getStatus() << response.getMessage();
 }
@@ -30,12 +31,11 @@ int main()
     do
     {
         std::cout << "Enter the FTP server address: ";
-        std::cin  >> address;
-    }
-    while (address == sf::IpAddress::None);
+        std::cin >> address;
+    } while (address == sf::IpAddress::None);
 
     // Connect to the server
-    sf::Ftp server;
+    sf::Ftp           server;
     sf::Ftp::Response connectResponse = server.connect(address);
     std::cout << connectResponse << std::endl;
     if (!connectResponse.isOk())
@@ -44,9 +44,9 @@ int main()
     // Ask for user name and password
     std::string user, password;
     std::cout << "User name: ";
-    std::cin  >> user;
+    std::cin >> user;
     std::cout << "Password: ";
-    std::cin  >> password;
+    std::cin >> password;
 
     // Login to the server
     sf::Ftp::Response loginResponse = server.login(user, password);
@@ -74,13 +74,12 @@ int main()
                   << std::endl;
 
         std::cout << "Your choice: ";
-        std::cin  >> choice;
+        std::cin >> choice;
         std::cout << std::endl;
 
         switch (choice)
         {
-            default:
-            {
+            default : {
                 // Wrong choice
                 std::cout << "Invalid choice!" << std::endl;
                 std::cin.clear();
@@ -88,104 +87,92 @@ int main()
                 break;
             }
 
-            case 1:
-            {
+            case 1 : {
                 // Print the current server directory
                 sf::Ftp::DirectoryResponse response = server.getWorkingDirectory();
-                std::cout << response << '\n'
-                          << "Current directory is " << response.getDirectory() << std::endl;
+                std::cout << response << '\n' << "Current directory is " << response.getDirectory() << std::endl;
                 break;
             }
 
-            case 2:
-            {
+            case 2 : {
                 // Print the contents of the current server directory
                 sf::Ftp::ListingResponse response = server.getDirectoryListing();
                 std::cout << response << '\n';
-                for (const std::string& name : response.getListing())
-                    std::cout << name << '\n';
+                for (const std::string& name : response.getListing()) std::cout << name << '\n';
                 std::cout.flush();
                 break;
             }
 
-            case 3:
-            {
+            case 3 : {
                 // Change the current directory
                 std::string directory;
                 std::cout << "Choose a directory: ";
-                std::cin  >> directory;
+                std::cin >> directory;
                 std::cout << server.changeDirectory(directory) << std::endl;
                 break;
             }
 
-            case 4:
-            {
+            case 4 : {
                 // Create a new directory
                 std::string directory;
                 std::cout << "Name of the directory to create: ";
-                std::cin  >> directory;
+                std::cin >> directory;
                 std::cout << server.createDirectory(directory) << std::endl;
                 break;
             }
 
-            case 5:
-            {
+            case 5 : {
                 // Remove an existing directory
                 std::string directory;
                 std::cout << "Name of the directory to remove: ";
-                std::cin  >> directory;
+                std::cin >> directory;
                 std::cout << server.deleteDirectory(directory) << std::endl;
                 break;
             }
 
-            case 6:
-            {
+            case 6 : {
                 // Rename a file
                 std::string source, destination;
                 std::cout << "Name of the file to rename: ";
-                std::cin  >> source;
+                std::cin >> source;
                 std::cout << "New name: ";
-                std::cin  >> destination;
+                std::cin >> destination;
                 std::cout << server.renameFile(source, destination) << std::endl;
                 break;
             }
 
-            case 7:
-            {
+            case 7 : {
                 // Remove an existing directory
                 std::string filename;
                 std::cout << "Name of the file to remove: ";
-                std::cin  >> filename;
+                std::cin >> filename;
                 std::cout << server.deleteFile(filename) << std::endl;
                 break;
             }
 
-            case 8:
-            {
+            case 8 : {
                 // Download a file from server
                 std::string filename, directory;
                 std::cout << "Filename of the file to download (relative to current directory): ";
-                std::cin  >> filename;
+                std::cin >> filename;
                 std::cout << "Directory to download the file to: ";
-                std::cin  >> directory;
+                std::cin >> directory;
                 std::cout << server.download(filename, directory) << std::endl;
                 break;
             }
 
-            case 9:
-            {
+            case 9 : {
                 // Upload a file to server
                 std::string filename, directory;
                 std::cout << "Path of the file to upload (absolute or relative to working directory): ";
-                std::cin  >> filename;
+                std::cin >> filename;
                 std::cout << "Directory to upload the file to (relative to current directory): ";
-                std::cin  >> directory;
+                std::cin >> directory;
                 std::cout << server.upload(filename, directory) << std::endl;
                 break;
             }
 
-            case 0:
-            {
+            case 0 : {
                 // Disconnect
                 break;
             }
@@ -194,8 +181,7 @@ int main()
     } while (choice != 0);
 
     // Disconnect from the server
-    std::cout << "Disconnecting from server...\n"
-              << server.disconnect() << '\n';
+    std::cout << "Disconnecting from server...\n" << server.disconnect() << '\n';
 
     // Wait until the user presses 'enter' key
     std::cout << "Press enter to exit..." << std::endl;

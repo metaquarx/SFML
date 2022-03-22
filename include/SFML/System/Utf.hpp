@@ -29,32 +29,32 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Config.hpp>
+
+#include <cstdlib>
 #include <iterator>
 #include <locale>
 #include <string>
-#include <cstdlib>
 
 
 namespace sf
 {
 namespace priv
 {
-    template<class InputIt, class OutputIt>
-    OutputIt copy(InputIt first, InputIt last, OutputIt d_first);
+template<class InputIt, class OutputIt>
+OutputIt copy(InputIt first, InputIt last, OutputIt d_first);
 }
 
-template <unsigned int N>
+template<unsigned int N>
 class Utf;
 
 ////////////////////////////////////////////////////////////
 /// \brief Specialization of the Utf template for UTF-8
 ///
 ////////////////////////////////////////////////////////////
-template <>
+template<>
 class Utf<8>
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Decode a single UTF-8 character
     ///
@@ -69,7 +69,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In decode(In begin, In end, Uint32& output, Uint32 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename Out>
+    template<typename Out>
     static Out encode(Uint32 input, Out output, Uint8 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In next(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static std::size_t count(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromWide(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromLatin1(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toWide(In begin, In end, Out output, wchar_t replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -205,7 +205,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toLatin1(In begin, In end, Out output, char replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf8(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -236,7 +236,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf16(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf32(In begin, In end, Out output);
 };
 
@@ -257,11 +257,10 @@ public:
 /// \brief Specialization of the Utf template for UTF-16
 ///
 ////////////////////////////////////////////////////////////
-template <>
+template<>
 class Utf<16>
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Decode a single UTF-16 character
     ///
@@ -276,7 +275,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In decode(In begin, In end, Uint32& output, Uint32 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -292,7 +291,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename Out>
+    template<typename Out>
     static Out encode(Uint32 input, Out output, Uint16 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -307,7 +306,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In next(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -323,7 +322,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static std::size_t count(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -340,7 +339,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -353,7 +352,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromWide(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -366,7 +365,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromLatin1(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -384,7 +383,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -398,7 +397,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toWide(In begin, In end, Out output, wchar_t replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -412,7 +411,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toLatin1(In begin, In end, Out output, char replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -425,7 +424,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf8(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -443,7 +442,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf16(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -456,7 +455,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf32(In begin, In end, Out output);
 };
 
@@ -464,11 +463,10 @@ public:
 /// \brief Specialization of the Utf template for UTF-32
 ///
 ////////////////////////////////////////////////////////////
-template <>
+template<>
 class Utf<32>
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Decode a single UTF-32 character
     ///
@@ -484,7 +482,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In decode(In begin, In end, Uint32& output, Uint32 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -501,7 +499,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename Out>
+    template<typename Out>
     static Out encode(Uint32 input, Out output, Uint32 replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -516,7 +514,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static In next(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -531,7 +529,7 @@ public:
     /// \return Iterator pointing to one past the last read element of the input sequence
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static std::size_t count(In begin, In end);
 
     ////////////////////////////////////////////////////////////
@@ -548,7 +546,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -561,7 +559,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromWide(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -574,7 +572,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out fromLatin1(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -592,7 +590,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -606,7 +604,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toWide(In begin, In end, Out output, wchar_t replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -620,7 +618,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toLatin1(In begin, In end, Out output, char replacement = 0);
 
     ////////////////////////////////////////////////////////////
@@ -633,7 +631,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf8(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -646,7 +644,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf16(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -664,7 +662,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In, typename Out>
+    template<typename In, typename Out>
     static Out toUtf32(In begin, In end, Out output);
 
     ////////////////////////////////////////////////////////////
@@ -680,7 +678,7 @@ public:
     /// \return Converted character
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static Uint32 decodeAnsi(In input, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -695,7 +693,7 @@ public:
     /// \return Converted character
     ///
     ////////////////////////////////////////////////////////////
-    template <typename In>
+    template<typename In>
     static Uint32 decodeWide(In input);
 
     ////////////////////////////////////////////////////////////
@@ -713,7 +711,7 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename Out>
+    template<typename Out>
     static Out encodeAnsi(Uint32 codepoint, Out output, char replacement = 0, const std::locale& locale = std::locale());
 
     ////////////////////////////////////////////////////////////
@@ -730,14 +728,14 @@ public:
     /// \return Iterator to the end of the output sequence which has been written
     ///
     ////////////////////////////////////////////////////////////
-    template <typename Out>
+    template<typename Out>
     static Out encodeWide(Uint32 codepoint, Out output, wchar_t replacement = 0);
 };
 
 #include <SFML/System/Utf.inl>
 
 // Make type aliases to get rid of the template syntax
-using Utf8 = Utf<8>;
+using Utf8  = Utf<8>;
 using Utf16 = Utf<16>;
 using Utf32 = Utf<32>;
 

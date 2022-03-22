@@ -29,6 +29,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Network/Export.hpp>
+
 #include <SFML/Network/Socket.hpp>
 #include <SFML/System/Time.hpp>
 
@@ -46,7 +47,6 @@ class Packet;
 class SFML_NETWORK_API TcpSocket : public Socket
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -209,7 +209,6 @@ public:
     [[nodiscard]] Status receive(Packet& packet);
 
 private:
-
     friend class TcpListener;
 
     ////////////////////////////////////////////////////////////

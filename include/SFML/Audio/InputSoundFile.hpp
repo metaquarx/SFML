@@ -29,10 +29,11 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Export.hpp>
+
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <string>
-#include <cstddef>
 
 
 namespace sf
@@ -48,7 +49,6 @@ class SoundFileReader;
 class SFML_AUDIO_API InputSoundFile
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -229,7 +229,7 @@ private:
         StreamDeleter(bool theOwned);
 
         // To accept ownership transfer from usual std::unique_ptr<T>
-        template <typename T>
+        template<typename T>
         StreamDeleter(const std::default_delete<T>&);
 
         void operator()(InputStream* ptr) const;

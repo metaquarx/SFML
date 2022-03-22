@@ -32,6 +32,7 @@
 #include <SFML/Window/Context.hpp>
 #include <SFML/Window/ContextSettings.hpp>
 #include <SFML/Window/GlResource.hpp>
+
 #include <memory>
 
 
@@ -48,7 +49,6 @@ class WindowImpl;
 class GlContext
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Perform resource initialization
     ///
@@ -242,7 +242,6 @@ public:
     virtual void setVerticalSyncEnabled(bool enabled) = 0;
 
 protected:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -288,7 +287,14 @@ protected:
     /// \return Score of the configuration
     ///
     ////////////////////////////////////////////////////////////
-    static int evaluateFormat(unsigned int bitsPerPixel, const ContextSettings& settings, int colorBits, int depthBits, int stencilBits, int antialiasing, bool accelerated, bool sRgb);
+    static int evaluateFormat(unsigned int           bitsPerPixel,
+                              const ContextSettings& settings,
+                              int                    colorBits,
+                              int                    depthBits,
+                              int                    stencilBits,
+                              int                    antialiasing,
+                              bool                   accelerated,
+                              bool                   sRgb);
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -296,7 +302,6 @@ protected:
     ContextSettings m_settings; //!< Creation settings of the context
 
 private:
-
     ////////////////////////////////////////////////////////////
     /// \brief Perform various initializations after the context construction
     /// \param requestedSettings Requested settings during context creation

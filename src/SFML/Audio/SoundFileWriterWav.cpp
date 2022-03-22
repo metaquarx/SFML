@@ -28,47 +28,39 @@
 #include <SFML/Audio/SoundFileWriterWav.hpp>
 #include <SFML/System/Err.hpp>
 #include <SFML/System/Utils.hpp>
-#include <ostream>
+
 #include <cassert>
+#include <ostream>
 
 
 namespace
 {
-    // The following functions takes integers in host byte order
-    // and writes them to a stream as little endian
+// The following functions takes integers in host byte order
+// and writes them to a stream as little endian
 
-    void encode(std::ostream& stream, sf::Int16 value)
-    {
-        unsigned char bytes[] =
-        {
-            static_cast<unsigned char>(value & 0xFF),
-            static_cast<unsigned char>(value >> 8)
-        };
-        stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
-    }
-
-    void encode(std::ostream& stream, sf::Uint16 value)
-    {
-        unsigned char bytes[] =
-        {
-            static_cast<unsigned char>(value & 0xFF),
-            static_cast<unsigned char>(value >> 8)
-        };
-        stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
-    }
-
-    void encode(std::ostream& stream, sf::Uint32 value)
-    {
-        unsigned char bytes[] =
-        {
-            static_cast<unsigned char>(value & 0x000000FF),
-            static_cast<unsigned char>((value & 0x0000FF00) >> 8),
-            static_cast<unsigned char>((value & 0x00FF0000) >> 16),
-            static_cast<unsigned char>((value & 0xFF000000) >> 24),
-        };
-        stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
-    }
+void encode(std::ostream& stream, sf::Int16 value)
+{
+    unsigned char bytes[] = {static_cast<unsigned char>(value & 0xFF), static_cast<unsigned char>(value >> 8)};
+    stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
 }
+
+void encode(std::ostream& stream, sf::Uint16 value)
+{
+    unsigned char bytes[] = {static_cast<unsigned char>(value & 0xFF), static_cast<unsigned char>(value >> 8)};
+    stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
+}
+
+void encode(std::ostream& stream, sf::Uint32 value)
+{
+    unsigned char bytes[] = {
+        static_cast<unsigned char>(value & 0x000000FF),
+        static_cast<unsigned char>((value & 0x0000FF00) >> 8),
+        static_cast<unsigned char>((value & 0x00FF0000) >> 16),
+        static_cast<unsigned char>((value & 0xFF000000) >> 24),
+    };
+    stream.write(reinterpret_cast<const char*>(bytes), sizeof(bytes));
+}
+} // namespace
 
 namespace sf
 {
@@ -82,8 +74,7 @@ bool SoundFileWriterWav::check(const std::filesystem::path& filename)
 
 
 ////////////////////////////////////////////////////////////
-SoundFileWriterWav::SoundFileWriterWav() :
-m_file()
+SoundFileWriterWav::SoundFileWriterWav() : m_file()
 {
 }
 
@@ -122,8 +113,7 @@ void SoundFileWriterWav::write(const Int16* samples, Uint64 count)
 {
     assert(m_file.good());
 
-    while (count--)
-        encode(m_file, *samples++);
+    while (count--) encode(m_file, *samples++);
 }
 
 
@@ -181,7 +171,7 @@ void SoundFileWriterWav::close()
         m_file.flush();
 
         // Update the main chunk size and data sub-chunk size
-        Uint32 fileSize = static_cast<Uint32>(m_file.tellp());
+        Uint32 fileSize      = static_cast<Uint32>(m_file.tellp());
         Uint32 mainChunkSize = fileSize - 8;  // 8 bytes RIFF header
         Uint32 dataChunkSize = fileSize - 44; // 44 bytes RIFF + WAVE headers
         m_file.seekp(4);

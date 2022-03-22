@@ -1,7 +1,8 @@
 #include <SFML/Graphics/Color.hpp>
-#include "GraphicsUtil.hpp"
 
 #include <doctest.h>
+
+#include "GraphicsUtil.hpp"
 
 TEST_CASE("sf::Color class - [graphics]")
 {
@@ -37,7 +38,7 @@ TEST_CASE("sf::Color class - [graphics]")
 
     SUBCASE("Integer conversions")
     {
-        sf::Color c(1, 2, 3, 4);
+        sf::Color  c(1, 2, 3, 4);
         sf::Uint32 cInt = c.toInteger();
 
         sf::Color c2(cInt);

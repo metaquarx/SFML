@@ -3,7 +3,7 @@
 #include <doctest.h>
 #include <limits>
 
-template <typename IntegerType>
+template<typename IntegerType>
 static void testPacketStreamOperators(IntegerType expected)
 {
     sf::Packet packet;

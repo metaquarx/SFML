@@ -3,6 +3,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Network.hpp>
+
 #include <iostream>
 
 
@@ -21,9 +22,9 @@ void runUdpServer(unsigned short port)
     std::cout << "Server is listening to port " << port << ", waiting for a message... " << std::endl;
 
     // Wait for a message
-    char in[128];
-    std::size_t received;
-    sf::IpAddress sender;
+    char           in[128];
+    std::size_t    received;
+    sf::IpAddress  sender;
     unsigned short senderPort;
     if (socket.receive(in, sizeof(in), received, sender, senderPort) != sf::Socket::Done)
         return;
@@ -48,9 +49,8 @@ void runUdpClient(unsigned short port)
     do
     {
         std::cout << "Type the address or name of the server to connect to: ";
-        std::cin  >> server;
-    }
-    while (server == sf::IpAddress::None);
+        std::cin >> server;
+    } while (server == sf::IpAddress::None);
 
     // Create a socket for communicating with the server
     sf::UdpSocket socket;
@@ -62,9 +62,9 @@ void runUdpClient(unsigned short port)
     std::cout << "Message sent to the server: \"" << out << '"' << std::endl;
 
     // Receive an answer from anyone (but most likely from the server)
-    char in[128];
-    std::size_t received;
-    sf::IpAddress sender;
+    char           in[128];
+    std::size_t    received;
+    sf::IpAddress  sender;
     unsigned short senderPort;
     if (socket.receive(in, sizeof(in), received, sender, senderPort) != sf::Socket::Done)
         return;

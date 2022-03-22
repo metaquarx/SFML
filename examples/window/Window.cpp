@@ -2,6 +2,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window.hpp>
+
 #include <cstdlib>
 
 #define GLAD_GL_IMPLEMENTATION
@@ -11,8 +12,8 @@
 #include <SFML/Main.hpp>
 #endif
 
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 
 ////////////////////////////////////////////////////////////
 /// Entry point of application

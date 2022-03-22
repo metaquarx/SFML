@@ -28,11 +28,12 @@
 #include <SFML/Audio/SoundFileWriterOgg.hpp>
 #include <SFML/System/Err.hpp>
 #include <SFML/System/Utils.hpp>
+
 #include <algorithm>
-#include <ostream>
+#include <cassert>
 #include <cctype>
 #include <cstdlib>
-#include <cassert>
+#include <ostream>
 
 
 namespace sf
@@ -47,12 +48,7 @@ bool SoundFileWriterOgg::check(const std::filesystem::path& filename)
 
 
 ////////////////////////////////////////////////////////////
-SoundFileWriterOgg::SoundFileWriterOgg() :
-m_channelCount(0),
-m_file        (),
-m_ogg         (),
-m_vorbis      (),
-m_state       ()
+SoundFileWriterOgg::SoundFileWriterOgg() : m_channelCount(0), m_file(), m_ogg(), m_vorbis(), m_state()
 {
 }
 
@@ -143,8 +139,7 @@ void SoundFileWriterOgg::write(const Int16* samples, Uint64 count)
 
         // Write the samples to the buffer, converted to float
         for (int i = 0; i < std::min(frameCount, bufferSize); ++i)
-            for (unsigned int j = 0; j < m_channelCount; ++j)
-                buffer[j][i] = *samples++ / 32767.0f;
+            for (unsigned int j = 0; j < m_channelCount; ++j) buffer[j][i] = *samples++ / 32767.0f;
 
         // Tell the library how many samples we've written
         vorbis_analysis_wrote(&m_state, std::min(frameCount, bufferSize));

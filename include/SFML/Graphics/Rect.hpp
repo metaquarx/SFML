@@ -29,6 +29,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/System/Vector2.hpp>
+
 #include <optional>
 
 
@@ -38,11 +39,10 @@ namespace sf
 /// \brief Utility class for manipulating 2D axis aligned rectangles
 ///
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 class Rect
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -75,7 +75,7 @@ public:
     /// \param rectangle Rectangle to convert
     ///
     ////////////////////////////////////////////////////////////
-    template <typename U>
+    template<typename U>
     constexpr explicit Rect(const Rect<U>& rectangle);
 
     ////////////////////////////////////////////////////////////
@@ -146,8 +146,8 @@ public:
 /// \return True if \a left is equal to \a right
 ///
 ////////////////////////////////////////////////////////////
-template <typename T>
-[[nodiscard]] constexpr bool operator ==(const Rect<T>& left, const Rect<T>& right);
+template<typename T>
+[[nodiscard]] constexpr bool operator==(const Rect<T>& left, const Rect<T>& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates Rect
@@ -161,13 +161,13 @@ template <typename T>
 /// \return True if \a left is not equal to \a right
 ///
 ////////////////////////////////////////////////////////////
-template <typename T>
-[[nodiscard]] constexpr bool operator !=(const Rect<T>& left, const Rect<T>& right);
+template<typename T>
+[[nodiscard]] constexpr bool operator!=(const Rect<T>& left, const Rect<T>& right);
 
 #include <SFML/Graphics/Rect.inl>
 
 // Create type aliases for the most common types
-using IntRect = Rect<int>;
+using IntRect   = Rect<int>;
 using FloatRect = Rect<float>;
 
 } // namespace sf

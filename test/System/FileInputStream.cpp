@@ -1,9 +1,10 @@
 #include <SFML/System/FileInputStream.hpp>
-#include "SystemUtil.hpp"
+
+#include <doctest.h>
 #include <string_view>
 #include <utility>
 
-#include <doctest.h>
+#include "SystemUtil.hpp"
 
 TEST_CASE("sf::FileInputStream class - [system]")
 {
@@ -21,7 +22,7 @@ TEST_CASE("sf::FileInputStream class - [system]")
         const std::string fileContents = "hello world";
 
         sf::Testing::TemporaryFile tmpFile(fileContents);
-        sf::FileInputStream fis;
+        sf::FileInputStream        fis;
 
         REQUIRE(fis.open(tmpFile.getPath()));
 

@@ -25,12 +25,13 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Network/IpAddress.hpp>
 #include <SFML/Network/Http.hpp>
+#include <SFML/Network/IpAddress.hpp>
 #include <SFML/Network/SocketImpl.hpp>
+
+#include <cstring>
 #include <istream>
 #include <ostream>
-#include <cstring>
 #include <utility>
 
 
@@ -44,43 +45,34 @@ const IpAddress IpAddress::Broadcast(255, 255, 255, 255);
 
 
 ////////////////////////////////////////////////////////////
-IpAddress::IpAddress() :
-m_address(0),
-m_valid  (false)
+IpAddress::IpAddress() : m_address(0), m_valid(false)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-IpAddress::IpAddress(const std::string& address) :
-m_address(0),
-m_valid  (false)
+IpAddress::IpAddress(const std::string& address) : m_address(0), m_valid(false)
 {
     resolve(address);
 }
 
 
 ////////////////////////////////////////////////////////////
-IpAddress::IpAddress(const char* address) :
-m_address(0),
-m_valid  (false)
+IpAddress::IpAddress(const char* address) : m_address(0), m_valid(false)
 {
     resolve(address);
 }
 
 
 ////////////////////////////////////////////////////////////
-IpAddress::IpAddress(Uint8 byte0, Uint8 byte1, Uint8 byte2, Uint8 byte3) :
-m_address(htonl(static_cast<uint32_t>((byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3))),
-m_valid  (true)
+IpAddress::IpAddress(Uint8 byte0, Uint8 byte1, Uint8 byte2, Uint8 byte3)
+: m_address(htonl(static_cast<uint32_t>((byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3))), m_valid(true)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-IpAddress::IpAddress(Uint32 address) :
-m_address(htonl(address)),
-m_valid  (true)
+IpAddress::IpAddress(Uint32 address) : m_address(htonl(address)), m_valid(true)
 {
 }
 
@@ -151,8 +143,8 @@ IpAddress IpAddress::getPublicAddress(Time timeout)
     // and parse the result to extract our IP address
     // (not very hard: the web page contains only our IP address).
 
-    Http server("www.sfml-dev.org");
-    Http::Request request("/ip-provider.php", Http::Request::Get);
+    Http           server("www.sfml-dev.org");
+    Http::Request  request("/ip-provider.php", Http::Request::Get);
     Http::Response page = server.sendRequest(request, timeout);
     if (page.getStatus() == Http::Response::Ok)
         return IpAddress(page.getBody());
@@ -166,19 +158,19 @@ IpAddress IpAddress::getPublicAddress(Time timeout)
 void IpAddress::resolve(const std::string& address)
 {
     m_address = 0;
-    m_valid = false;
+    m_valid   = false;
 
     if (address == "255.255.255.255")
     {
         // The broadcast address needs to be handled explicitly,
         // because it is also the value returned by inet_addr on error
         m_address = INADDR_BROADCAST;
-        m_valid = true;
+        m_valid   = true;
     }
     else if (address == "0.0.0.0")
     {
         m_address = INADDR_ANY;
-        m_valid = true;
+        m_valid   = true;
     }
     else
     {
@@ -187,14 +179,14 @@ void IpAddress::resolve(const std::string& address)
         if (ip != INADDR_NONE)
         {
             m_address = ip;
-            m_valid = true;
+            m_valid   = true;
         }
         else
         {
             // Not a valid address, try to convert it as a host name
             addrinfo hints;
             std::memset(&hints, 0, sizeof(hints));
-            hints.ai_family = AF_INET;
+            hints.ai_family  = AF_INET;
             addrinfo* result = nullptr;
             if (getaddrinfo(address.c_str(), nullptr, &hints, &result) == 0)
             {
@@ -205,7 +197,7 @@ void IpAddress::resolve(const std::string& address)
                     ip = sin.sin_addr.s_addr;
                     freeaddrinfo(result);
                     m_address = ip;
-                    m_valid = true;
+                    m_valid   = true;
                 }
             }
         }
@@ -214,49 +206,49 @@ void IpAddress::resolve(const std::string& address)
 
 
 ////////////////////////////////////////////////////////////
-bool operator ==(const IpAddress& left, const IpAddress& right)
+bool operator==(const IpAddress& left, const IpAddress& right)
 {
     return !(left < right) && !(right < left);
 }
 
 
 ////////////////////////////////////////////////////////////
-bool operator !=(const IpAddress& left, const IpAddress& right)
+bool operator!=(const IpAddress& left, const IpAddress& right)
 {
     return !(left == right);
 }
 
 
 ////////////////////////////////////////////////////////////
-bool operator <(const IpAddress& left, const IpAddress& right)
+bool operator<(const IpAddress& left, const IpAddress& right)
 {
     return std::make_pair(left.m_valid, left.m_address) < std::make_pair(right.m_valid, right.m_address);
 }
 
 
 ////////////////////////////////////////////////////////////
-bool operator >(const IpAddress& left, const IpAddress& right)
+bool operator>(const IpAddress& left, const IpAddress& right)
 {
     return right < left;
 }
 
 
 ////////////////////////////////////////////////////////////
-bool operator <=(const IpAddress& left, const IpAddress& right)
+bool operator<=(const IpAddress& left, const IpAddress& right)
 {
     return !(right < left);
 }
 
 
 ////////////////////////////////////////////////////////////
-bool operator >=(const IpAddress& left, const IpAddress& right)
+bool operator>=(const IpAddress& left, const IpAddress& right)
 {
     return !(left < right);
 }
 
 
 ////////////////////////////////////////////////////////////
-std::istream& operator >>(std::istream& stream, IpAddress& address)
+std::istream& operator>>(std::istream& stream, IpAddress& address)
 {
     std::string str;
     stream >> str;
@@ -267,7 +259,7 @@ std::istream& operator >>(std::istream& stream, IpAddress& address)
 
 
 ////////////////////////////////////////////////////////////
-std::ostream& operator <<(std::ostream& stream, const IpAddress& address)
+std::ostream& operator<<(std::ostream& stream, const IpAddress& address)
 {
     return stream << address.toString();
 }

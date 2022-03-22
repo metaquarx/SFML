@@ -29,8 +29,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/Export.hpp>
-#include <SFML/Window/GlResource.hpp>
+
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Window/GlResource.hpp>
+
 #include <filesystem>
 #include <string>
 
@@ -51,7 +53,6 @@ class Image;
 class SFML_GRAPHICS_API Texture : GlResource
 {
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Types of texture coordinates that can be used for rendering
     ///
@@ -63,7 +64,6 @@ public:
     };
 
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -519,7 +519,7 @@ public:
     /// \return Reference to self
     ///
     ////////////////////////////////////////////////////////////
-    Texture& operator =(const Texture& right);
+    Texture& operator=(const Texture& right);
 
     ////////////////////////////////////////////////////////////
     /// \brief Swap the contents of this texture with those of another
@@ -587,7 +587,6 @@ public:
     static unsigned int getMaximumSize();
 
 private:
-
     friend class Text;
     friend class RenderTexture;
     friend class RenderTarget;

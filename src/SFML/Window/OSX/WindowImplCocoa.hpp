@@ -33,13 +33,13 @@
 #include <SFML/Window/WindowImpl.hpp>
 
 #if defined(__APPLE__)
-    #if defined(__clang__)
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    #elif defined(__GNUC__)
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    #endif
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #endif
 
 ////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@
 #ifdef __OBJC__
 
 #import <SFML/Window/OSX/WindowImplDelegateProtocol.h>
-using WindowImplDelegateRef = id<WindowImplDelegateProtocol,NSObject>;
+using WindowImplDelegateRef = id<WindowImplDelegateProtocol, NSObject>;
 
 @class NSOpenGLContext;
 using NSOpenGLContextRef = NSOpenGLContext*;
@@ -58,7 +58,7 @@ using NSOpenGLContextRef = NSOpenGLContext*;
 using unichar = unsigned short; // See NSString.h
 
 using WindowImplDelegateRef = void*;
-using NSOpenGLContextRef = void*;
+using NSOpenGLContextRef    = void*;
 
 #endif
 
@@ -249,7 +249,6 @@ public:
     static void setUpProcess(void);
 
 public:
-
     ////////////////////////////////////////////////////////////
     /// \brief Get the OS-specific handle of the window
     ///
@@ -364,7 +363,6 @@ public:
     bool hasFocus() const override;
 
 protected:
-
     ////////////////////////////////////////////////////////////
     /// \brief Process incoming events from the operating system
     ///
@@ -372,7 +370,6 @@ protected:
     void processEvents() override;
 
 private:
-
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
@@ -385,11 +382,11 @@ private:
 } // namespace sf
 
 #if defined(__APPLE__)
-    #if defined(__clang__)
-        #pragma clang diagnostic pop
-    #elif defined(__GNUC__)
-        #pragma GCC diagnostic pop
-    #endif
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 #endif // SFML_WINDOWIMPLCOCOA_HPP

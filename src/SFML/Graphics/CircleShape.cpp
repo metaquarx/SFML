@@ -26,15 +26,14 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/CircleShape.hpp>
+
 #include <cmath>
 
 
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-CircleShape::CircleShape(float radius, std::size_t pointCount) :
-m_radius    (radius),
-m_pointCount(pointCount)
+CircleShape::CircleShape(float radius, std::size_t pointCount) : m_radius(radius), m_pointCount(pointCount)
 {
     update();
 }
@@ -73,9 +72,9 @@ std::size_t CircleShape::getPointCount() const
 Vector2f CircleShape::getPoint(std::size_t index) const
 {
     Angle angle = static_cast<float>(index) / static_cast<float>(m_pointCount) * sf::degrees(360) - sf::degrees(90);
-    float rad = angle.asRadians();
-    float x = std::cos(rad) * m_radius;
-    float y = std::sin(rad) * m_radius;
+    float rad   = angle.asRadians();
+    float x     = std::cos(rad) * m_radius;
+    float y     = std::sin(rad) * m_radius;
 
     return Vector2f(m_radius + x, m_radius + y);
 }

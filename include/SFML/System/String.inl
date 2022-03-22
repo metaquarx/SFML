@@ -24,7 +24,7 @@
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 String String::fromUtf8(T begin, T end)
 {
     String string;
@@ -34,7 +34,7 @@ String String::fromUtf8(T begin, T end)
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 String String::fromUtf16(T begin, T end)
 {
     String string;
@@ -44,7 +44,7 @@ String String::fromUtf16(T begin, T end)
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template<typename T>
 String String::fromUtf32(T begin, T end)
 {
     String string;

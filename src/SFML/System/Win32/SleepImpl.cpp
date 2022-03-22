@@ -25,9 +25,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <SFML/System/Time.hpp>
 #include <SFML/System/Win32/SleepImpl.hpp>
 #include <SFML/System/Win32/WindowsHeader.hpp>
-#include <SFML/System/Time.hpp>
+
 #include <mmsystem.h>
 
 namespace sf::priv
@@ -36,8 +37,7 @@ namespace sf::priv
 void sleepImpl(Time time)
 {
     // Get the minimum supported timer resolution on this system
-    static const UINT periodMin = []
-    {
+    static const UINT periodMin = [] {
         TIMECAPS tc;
         timeGetDevCaps(&tc, sizeof(TIMECAPS));
         return tc.wPeriodMin;
