@@ -15,13 +15,9 @@ set(SRC
     ${INCROOT}/NativeActivity.hpp
     ${SRCROOT}/Sleep.cpp
     ${INCROOT}/Sleep.hpp
-    ${SRCROOT}/String.cpp
-    ${INCROOT}/String.hpp
-    ${INCROOT}/String.inl
     ${INCROOT}/Time.hpp
     ${INCROOT}/Time.inl
     ${INCROOT}/Utf.hpp
-    ${INCROOT}/Utf.inl
     ${INCROOT}/Vector2.hpp
     ${INCROOT}/Vector2.inl
     ${INCROOT}/Vector3.hpp
