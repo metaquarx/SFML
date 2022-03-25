@@ -19,6 +19,7 @@ SET(SYSTEM_SRC
     System/Time.cpp
     System/Vector2.cpp
     System/Vector3.cpp
+    System/Utf.cpp
 )
 sfml_add_test(test-sfml-system "${SYSTEM_SRC}" SFML::System)
 
@@ -59,7 +60,7 @@ endif()
 
 # Automatically run the tests at the end of the build
 add_custom_target(runtests ALL
-                  DEPENDS test-sfml-system test-sfml-window test-sfml-graphics test-sfml-network test-sfml-audio
+                  DEPENDS test-sfml-system
 )
 
 if(SFML_OS_WINDOWS AND NOT SFML_USE_SYSTEM_DEPS)

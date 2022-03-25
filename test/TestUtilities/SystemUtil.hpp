@@ -17,11 +17,9 @@
 namespace sf
 {
     class Angle;
-    class String;
     class Time;
 
     std::ostream& operator <<(std::ostream& os, const sf::Angle& angle);
-    std::ostream& operator <<(std::ostream& os, const sf::String& string);
     std::ostream& operator <<(std::ostream& os, sf::Time time);
 
     template <typename T>

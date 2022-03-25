@@ -28,21 +28,51 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <SFML/System/Export.hpp>
+
 #include <SFML/Config.hpp>
+
 #include <string>
 
-namespace sf
+namespace sf::encode
 {
 
+////////////////////////////////////////////////////////////
+/// \brief Conversions to UTF-8
+///
+////////////////////////////////////////////////////////////
+std::string SFML_SYSTEM_API Utf8(std::u16string source);
+std::string SFML_SYSTEM_API Utf8(std::u32string source);
+std::string SFML_SYSTEM_API Utf8(std::wstring source);
 
+////////////////////////////////////////////////////////////
+/// \brief Conversions to UTF-16
+///
+////////////////////////////////////////////////////////////
+std::u16string SFML_SYSTEM_API Utf16(std::string source);
+std::u16string SFML_SYSTEM_API Utf16(std::u32string source);
+std::u16string SFML_SYSTEM_API Utf16(std::wstring source);
 
+////////////////////////////////////////////////////////////
+/// \brief Conversions to UTF-32
+///
+////////////////////////////////////////////////////////////
+std::u32string SFML_SYSTEM_API Utf32(std::u16string source);
+std::u32string SFML_SYSTEM_API Utf32(std::string source);
+std::u32string SFML_SYSTEM_API Utf32(std::wstring source);
 
+////////////////////////////////////////////////////////////
+/// \brief Conversions to Wide string
+///
+////////////////////////////////////////////////////////////
+std::wstring SFML_SYSTEM_API Wide(std::string source);
+std::wstring SFML_SYSTEM_API Wide(std::u16string source);
+std::wstring SFML_SYSTEM_API Wide(std::u32string source);
 
-} // namespace sf
+} // namespace sf::encode
 
 
 #endif // SFML_UTF_HPP
-
 
 ////////////////////////////////////////////////////////////
 /// \class sf::Utf

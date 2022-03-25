@@ -18,6 +18,7 @@ set(SRC
     ${INCROOT}/Time.hpp
     ${INCROOT}/Time.inl
     ${INCROOT}/Utf.hpp
+    ${SRCROOT}/Utf.cpp
     ${INCROOT}/Vector2.hpp
     ${INCROOT}/Vector2.inl
     ${INCROOT}/Vector3.hpp
