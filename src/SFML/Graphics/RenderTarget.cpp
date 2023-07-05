@@ -171,6 +171,8 @@ void RenderTarget::clear(const Color& color)
 
         glCheck(glClearColor(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
+
+        std::cout << "Clear" << std::endl;
     }
 }
 
@@ -262,6 +264,7 @@ void RenderTarget::draw(const Drawable& drawable, const RenderStates& states)
 ////////////////////////////////////////////////////////////
 void RenderTarget::draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states)
 {
+    std::cout << "Target draw vertices " << vertexCount << std::endl;
     // Nothing to draw?
     if (!vertices || (vertexCount == 0))
         return;
@@ -338,6 +341,7 @@ void RenderTarget::draw(const VertexBuffer& vertexBuffer, const RenderStates& st
 ////////////////////////////////////////////////////////////
 void RenderTarget::draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states)
 {
+    std::cout << "Target draw buffer " << vertexCount << std::endl;
     // VertexBuffer not supported?
     if (!VertexBuffer::isAvailable())
     {
