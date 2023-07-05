@@ -449,11 +449,10 @@ private:
     ////////////////////////////////////////////////////////////
     /// \brief Setup environment for drawing
     ///
-    /// \param useVertexCache Are we going to use the vertex cache?
     /// \param states         Render states to use for drawing
     ///
     ////////////////////////////////////////////////////////////
-    void setupDraw(bool useVertexCache, const RenderStates& states);
+    void setupDraw(const RenderStates& states);
 
     ////////////////////////////////////////////////////////////
     /// \brief Draw the primitives
@@ -473,30 +472,12 @@ private:
     ////////////////////////////////////////////////////////////
     void cleanupDraw(const RenderStates& states);
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Render states cache
-    ///
-    ////////////////////////////////////////////////////////////
-    struct StatesCache
-    {
-        static constexpr std::size_t VertexCacheSize{4}; // NOLINT(readability-identifier-naming)
-
-        bool          enable;                       //!< Is the cache enabled?
-        bool          glStatesSet{};                //!< Are our internal GL states set yet?
-        bool          viewChanged;                  //!< Has the current view changed since last draw?
-        BlendMode     lastBlendMode;                //!< Cached blending mode
-        std::uint64_t lastTextureId;                //!< Cached texture
-        bool          texCoordsArrayEnabled;        //!< Is GL_TEXTURE_COORD_ARRAY client state enabled?
-        bool          useVertexCache;               //!< Did we previously use the vertex cache?
-        Vertex        vertexCache[VertexCacheSize]; //!< Pre-transformed vertices cache
-    };
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
     View          m_defaultView; //!< Default view
     View          m_view;        //!< Current view
-    StatesCache   m_cache;       //!< Render states cache
     std::uint64_t m_id{};        //!< Unique number that identifies the RenderTarget
 };
 
