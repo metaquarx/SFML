@@ -57,7 +57,7 @@ public:
     /// \brief Destructor
     ///
     ////////////////////////////////////////////////////////////
-    virtual ~RenderTarget();
+    virtual ~RenderTarget() = default;
 
     ////////////////////////////////////////////////////////////
     /// \brief Deleted copy constructor
@@ -396,7 +396,7 @@ protected:
     /// \brief Default constructor
     ///
     ////////////////////////////////////////////////////////////
-    RenderTarget();
+    RenderTarget() = default;
 
     ////////////////////////////////////////////////////////////
     /// \brief Performs the common initialization step after creation
