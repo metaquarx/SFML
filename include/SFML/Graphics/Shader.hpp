@@ -73,18 +73,22 @@ public:
     /// \see setUniform(const std::string&, CurrentTextureType)
     ///
     ////////////////////////////////////////////////////////////
-    struct CurrentTextureType
+    enum CurrentTextureType
     {
+        CurrentTexture
     };
 
     ////////////////////////////////////////////////////////////
-    /// \brief Represents the texture of the object being drawn
+    /// \brief Special type that can be passed to setUniform(),
+    ///        and that represents the viewport of the window
     ///
-    /// \see setUniform(const std::string&, CurrentTextureType)
+    /// \see setUniform(const std::string&, CurrentViewportType)
     ///
     ////////////////////////////////////////////////////////////
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    static CurrentTextureType CurrentTexture;
+    enum CurrentViewportType
+    {
+        CurrentViewport
+    };
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
@@ -527,6 +531,12 @@ public:
     void setUniform(const std::string& name, CurrentTextureType);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Specify current viewport as a \p mat4 uniform
+    ///
+    /// This overload maps a matrix variable to the viewport of the
+    /// window being drawn to, which cannot be known in advance
+
+    ////////////////////////////////////////////////////////////
     /// \brief Specify values for \p float[] array uniform
     ///
     /// \param name        Name of the uniform variable in GLSL
@@ -620,37 +630,6 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     static void bind(const Shader* shader);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Tell whether or not the system supports shaders
-    ///
-    /// This function should always be called before using
-    /// the shader features. If it returns false, then
-    /// any attempt to use sf::Shader will fail.
-    ///
-    /// \return True if shaders are supported, false otherwise
-    ///
-    ////////////////////////////////////////////////////////////
-    static bool isAvailable();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Tell whether or not the system supports geometry shaders
-    ///
-    /// This function should always be called before using
-    /// the geometry shader features. If it returns false, then
-    /// any attempt to use sf::Shader geometry shader features will fail.
-    ///
-    /// This function can only return true if isAvailable() would also
-    /// return true, since shaders in general have to be supported in
-    /// order for geometry shaders to be supported as well.
-    ///
-    /// Note: The first call to this function, whether by your
-    /// code or SFML will result in a context switch.
-    ///
-    /// \return True if geometry shaders are supported, false otherwise
-    ///
-    ////////////////////////////////////////////////////////////
-    static bool isGeometryAvailable();
 
 private:
     ////////////////////////////////////////////////////////////

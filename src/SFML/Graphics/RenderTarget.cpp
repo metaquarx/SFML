@@ -116,36 +116,29 @@ std::uint32_t equationToGlConstant(sf::BlendMode::Equation blendEquation)
     switch (blendEquation)
     {
         case sf::BlendMode::Add:
-            return GLEXT_GL_FUNC_ADD;
+            return GL_FUNC_ADD;
         case sf::BlendMode::Subtract:
-            if (GLEXT_blend_subtract)
-                return GLEXT_GL_FUNC_SUBTRACT;
-            break;
+            return GL_FUNC_SUBTRACT;
         case sf::BlendMode::ReverseSubtract:
-            if (GLEXT_blend_subtract)
-                return GLEXT_GL_FUNC_REVERSE_SUBTRACT;
-            break;
+            return GL_FUNC_REVERSE_SUBTRACT;
         case sf::BlendMode::Min:
-            if (GLEXT_blend_minmax)
-                return GLEXT_GL_MIN;
-            break;
+            return GL_MIN;
         case sf::BlendMode::Max:
-            if (GLEXT_blend_minmax)
-                return GLEXT_GL_MAX;
-            break;
+            return GL_MAX;
     }
+}
 
-    static bool warned = false;
-    if (!warned)
-    {
-        sf::err() << "OpenGL extension EXT_blend_minmax or EXT_blend_subtract unavailable" << '\n'
-                  << "Some blending equations will fallback to sf::BlendMode::Add" << '\n'
-                  << "Ensure that hardware acceleration is enabled if available" << std::endl;
 
-        warned = true;
+// Minimum number of vertices for each primitive type
+std::size_t minVertexCount(sf::PrimitiveType type) {
+    switch (type) {
+        case Points:        return 1
+        case Lines:         [[fallthrough]];
+        case LineStrip:     return 2;
+        case Triangles:     [[fallthrough]];
+        case TriangleStrip: [[fallthrough]];
+        case TriangleFan:   return 3;
     }
-
-    return GLEXT_GL_FUNC_ADD;
 }
 } // namespace RenderTargetImpl
 } // namespace
@@ -155,17 +148,19 @@ namespace sf
 {
 
 ////////////////////////////////////////////////////////////
+RenderTarget::~RenderTarget() {
+}
+
+////////////////////////////////////////////////////////////
 void RenderTarget::clear(const Color& color)
 {
     if (RenderTargetImpl::isActive(m_id) || setActive(true))
     {
         // Unbind texture to fix RenderTexture preventing clear
-        applyTexture(nullptr);
+        Texture::bind(nullptr);
 
         glCheck(glClearColor(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
-
-        std::cout << "Clear" << std::endl;
     }
 }
 
@@ -173,7 +168,7 @@ void RenderTarget::clear(const Color& color)
 ////////////////////////////////////////////////////////////
 void RenderTarget::setView(const View& view)
 {
-    m_view              = view;
+    m_view = view;
 }
 
 
@@ -256,32 +251,96 @@ void RenderTarget::draw(const Drawable& drawable, const RenderStates& states)
 ////////////////////////////////////////////////////////////
 void RenderTarget::draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states)
 {
-    std::cout << "Target draw vertices " << vertexCount << std::endl;
     // Nothing to draw?
-    if (!vertices || (vertexCount == 0))
+    if (!vertices || vertexCount < RenderTargetImpl::minVertexCount(type))
         return;
 
     if (RenderTargetImpl::isActive(m_id) || setActive(true))
     {
-        setupDraw(states);
+        auto new_type = type;
+        if (type == LineStrip) {
+            new_type = Lines;
+        } else if (type == TriangleStrip || type == TriangleFan) {
+            new_type == Triangles;
+        }
 
-        // Check if texture coordinates array is needed, and update client state accordingly
-        const bool enableTexCoordsArray = (states.texture || states.shader);
-        if (enableTexCoordsArray)
-            glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-        else
-            glCheck(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+        StepState new_state{new_type, states};
+        if (m_currentStep.state != new_state) {
+            clearOngoingStep();
+            m_currentStep.state = new_state;
+        }
 
-        // We need to set up the pointers to the vertices' components
-        const auto* data = reinterpret_cast<const std::byte*>(vertices);
+        auto& verts = m_currentStep.vertices;
+        auto& elements = m_currentStep.elements;
 
-        glCheck(glVertexPointer(2, GL_FLOAT, sizeof(Vertex), data + 0));
-        glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), data + 8));
-        if (enableTexCoordsArray)
-            glCheck(glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), data + 12));
+        verts.reserve(verts.size() + vertexcount * (2 + 4 + 2)) // xy rgba st
+        elements.reserve(elements.size() + (type ==     LineStrip ? (vertexCount - 1) * 2 :
+                                            type == TriangleStrip ? (vertexCount - 2) * 3 :
+                                            type ==   TriangleFan ? (vertexCount - 2) * 3 :
+                                            vertexCount));
 
-        drawPrimitives(type, 0, vertexCount);
-        cleanupDraw(states);
+
+        if (type == Points || type == Lines || type == Triangles) {
+            for (std::size_t i = 0; i < vertexCount; i++) {
+                elements.emplace_back(verts.size() / (2 + 4 + 2));
+
+                auto position = states.transform * vertices[i].position;
+                verts.emplace_back(position.x);
+                verts.emplace_back(position.y);
+
+                verts.emplace_back(vertices[i].color.r / 255.f);
+                verts.emplace_back(vertices[i].color.g / 255.f);
+                verts.emplace_back(vertices[i].color.b / 255.f);
+                verts.emplace_back(vertices[i].color.a / 255.f);
+
+                verts.emplace_back(vertices[i].texCoords.x);
+                verts.emplace_back(vertices[i].texCoords.y);
+            }
+        } else if (type == LineStrip) {
+            for (std::size_t i = 0; i < vertexCount; i++) {
+                if (i > 0) {
+                    elements.emplace_back(verts.size() / (2 + 4 + 2) - 1);
+                    elements.emplace_back(verts.size() / (2 + 4 + 2));
+                }
+
+                auto position = states.transform * vertices[i].position;
+                verts.emplace_back(position.x);
+                verts.emplace_back(position.y);
+
+                verts.emplace_back(vertices[i].color.r / 255.f);
+                verts.emplace_back(vertices[i].color.g / 255.f);
+                verts.emplace_back(vertices[i].color.b / 255.f);
+                verts.emplace_back(vertices[i].color.a / 255.f);
+
+                verts.emplace_back(vertices[i].texCoords.x);
+                verts.emplace_back(vertices[i].texCoords.y);
+            }
+        } else if (type == TriangleStrip) {
+            for (std::size_t i = 0; i < vertexCount; i++)
+        } else if (type == TriangleFan) {
+            auto root = verts.size() / (2 + 4 + 2);
+
+            for (std::size_t i = 0; i < vertexCount; i++) {
+                if (i > 2) {
+                    elements.emplace_back(root);
+                    elements.emplace_back(verts.size() / (2 + 4 + 2) - 1);
+                    elements.emplace_back(verts.size() / (2 + 4 + 2));
+                }
+
+                auto position = states.transform * vertices[i].position;
+                verts.emplace_back(position.x);
+                verts.emplace_back(position.y);
+
+                verts.emplace_back(vertices[i].color.r / 255.f);
+                verts.emplace_back(vertices[i].color.g / 255.f);
+                verts.emplace_back(vertices[i].color.b / 255.f);
+                verts.emplace_back(vertices[i].color.a / 255.f);
+
+                verts.emplace_back(vertices[i].texCoords.x);
+                verts.emplace_back(vertices[i].texCoords.y);
+
+            }
+        }
     }
 }
 
@@ -296,14 +355,6 @@ void RenderTarget::draw(const VertexBuffer& vertexBuffer, const RenderStates& st
 ////////////////////////////////////////////////////////////
 void RenderTarget::draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states)
 {
-    std::cout << "Target draw buffer " << vertexCount << std::endl;
-    // VertexBuffer not supported?
-    if (!VertexBuffer::isAvailable())
-    {
-        err() << "sf::VertexBuffer is not available, drawing skipped" << std::endl;
-        return;
-    }
-
     // Sanity check
     if (firstVertex > vertexBuffer.getVertexCount())
         return;
@@ -317,24 +368,16 @@ void RenderTarget::draw(const VertexBuffer& vertexBuffer, std::size_t firstVerte
 
     if (RenderTargetImpl::isActive(m_id) || setActive(true))
     {
-        setupDraw(states);
+        clearOngoingStep();
+        m_currentStep.state = {vertexBuffer.getPrimitiveType(), states};
+        m_currentStep.vbo = vertexBuffer.getNativeHandle();
+        m_currentStep.overruled = true;
+        m_currentStep.vertices.emplace_back(firstVertex);
+        m_currentStep.vertices.emplace_back(vertexCount);
+        m_steps.emplace_back(std::move(m_currentStep));
 
-        // Bind vertex buffer
-        VertexBuffer::bind(&vertexBuffer);
-
-        // Always enable texture coordinates
-        glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-
-        glCheck(glVertexPointer(2, GL_FLOAT, sizeof(Vertex), reinterpret_cast<const void*>(0)));
-        glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), reinterpret_cast<const void*>(8)));
-        glCheck(glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), reinterpret_cast<const void*>(12)));
-
-        drawPrimitives(vertexBuffer.getPrimitiveType(), firstVertex, vertexCount);
-
-        // Unbind vertex buffer
-        VertexBuffer::bind(nullptr);
-
-        cleanupDraw(states);
+        m_stepsIdx++;
+        m_currentStep = DrawStep{};
     }
 }
 
@@ -383,110 +426,57 @@ bool RenderTarget::setActive(bool active)
 
 
 ////////////////////////////////////////////////////////////
-void RenderTarget::pushGLStates()
-{
-    if (RenderTargetImpl::isActive(m_id) || setActive(true))
-    {
-#ifdef SFML_DEBUG
-        // make sure that the user didn't leave an unchecked OpenGL error
-        const GLenum error = glGetError();
-        if (error != GL_NO_ERROR)
-        {
-            err() << "OpenGL error (" << error << ") detected in user code, "
-                  << "you should check for errors with glGetError()" << std::endl;
-        }
-#endif
-
-#ifndef SFML_OPENGL_ES
-        glCheck(glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS));
-        glCheck(glPushAttrib(GL_ALL_ATTRIB_BITS));
-#endif
-        glCheck(glMatrixMode(GL_MODELVIEW));
-        glCheck(glPushMatrix());
-        glCheck(glMatrixMode(GL_PROJECTION));
-        glCheck(glPushMatrix());
-        glCheck(glMatrixMode(GL_TEXTURE));
-        glCheck(glPushMatrix());
-    }
-
-    resetGLStates();
-}
-
-
-////////////////////////////////////////////////////////////
-void RenderTarget::popGLStates()
-{
-    if (RenderTargetImpl::isActive(m_id) || setActive(true))
-    {
-        glCheck(glMatrixMode(GL_PROJECTION));
-        glCheck(glPopMatrix());
-        glCheck(glMatrixMode(GL_MODELVIEW));
-        glCheck(glPopMatrix());
-        glCheck(glMatrixMode(GL_TEXTURE));
-        glCheck(glPopMatrix());
-#ifndef SFML_OPENGL_ES
-        glCheck(glPopClientAttrib());
-        glCheck(glPopAttrib());
-#endif
+void RenderTarget::setDefaultShader(Shader* shader) {
+    if (shader) {
+        m_defaultShader = shader;
+    } else {
+        m_defaultShader = m_fallbackShader.get();
     }
 }
 
 
 ////////////////////////////////////////////////////////////
-void RenderTarget::resetGLStates()
+void RenderTarget::flush()
 {
-    // Check here to make sure a context change does not happen after activate(true)
-    const bool shaderAvailable       = Shader::isAvailable();
-    const bool vertexBufferAvailable = VertexBuffer::isAvailable();
+    clearOngoingStep();
+    m_stepsIdx = 0;
 
-// Workaround for states not being properly reset on
-// macOS unless a context switch really takes place
-#if defined(SFML_SYSTEM_MACOS)
-    if (!setActive(false))
-    {
-        err() << "Failed to set render target inactive" << std::endl;
-    }
-#endif
-
-    if (RenderTargetImpl::isActive(m_id) || setActive(true))
-    {
-        // Make sure that extensions are initialized
-        priv::ensureExtensionsInit();
-
-        // Make sure that the texture unit which is active is the number 0
-        if (GLEXT_multitexture)
-        {
-            glCheck(GLEXT_glClientActiveTexture(GLEXT_GL_TEXTURE0));
-            glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
+    if (RenderTargetImpl::isActive(m_id) || setActive(true)) {
+        if (isSrgb()) {
+            glCheck(glEnable(GL_FRAMEBUFFER_SRGB));
+        } else {
+            glCheck(glDisable(GL_FRAMEBUFFER_SRGB));
         }
 
-        // Define the default OpenGL states
-        glCheck(glDisable(GL_CULL_FACE));
-        glCheck(glDisable(GL_LIGHTING));
-        glCheck(glDisable(GL_DEPTH_TEST));
-        glCheck(glDisable(GL_ALPHA_TEST));
-        glCheck(glEnable(GL_TEXTURE_2D));
-        glCheck(glEnable(GL_BLEND));
-        glCheck(glMatrixMode(GL_MODELVIEW));
-        glCheck(glLoadIdentity());
-        glCheck(glEnableClientState(GL_VERTEX_ARRAY));
-        glCheck(glEnableClientState(GL_COLOR_ARRAY));
-        glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-
-        // Apply the default SFML states
         applyBlendMode(BlendAlpha);
-        applyTexture(nullptr);
-        if (shaderAvailable)
-            applyShader(nullptr);
 
-        if (vertexBufferAvailable)
-            glCheck(VertexBuffer::bind(nullptr));
+        const IntRect viewport = getViewport(m_view);
+        const int     top      = static_cast<int>(getSize().y) - (viewport.top + viewport.height);
+        glCheck(glViewport(viewport.left, top, viewport.width, viewport.height));
+        std::cout << "set viewport position (" << viewport.left << "," << top << "), size (" << viewport.width << "," << viewport.height << ")" << std::endl;
 
-        // Set the default view
-        setView(getView());
+        Shader* currentShader = m_defaultShader;
+        Shader::bind(currentShader);
+        currentShader->setUniform("viewport", Glsl::Mat4(m_view.getTransform().getMatrix()));
+        for (const auto& step : m_steps) {
+
+            glCheck(glBindVertexArray(step.vao));
+
+            static constexpr GLenum modes[] = {GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN};
+            glCheck(glDrawArrays(modes[static_cast<std::size_t>(step.state.type)], 0, step.vertices.size() / 8));
+
+            std::cout << "draw " << step.vbo << std::endl;
+        }
+
+        Shader::bind(nullptr);
     }
 }
 
+
+////////////////////////////////////////////////////////////
+RenderTarget::RenderTarget()
+: m_stepsIdx{0} {
+}
 
 ////////////////////////////////////////////////////////////
 void RenderTarget::initialize()
@@ -498,23 +488,38 @@ void RenderTarget::initialize()
     // Generate a unique ID for this RenderTarget to track
     // whether it is active within a specific context
     m_id = RenderTargetImpl::getUniqueId();
-}
 
-
-////////////////////////////////////////////////////////////
-void RenderTarget::applyCurrentView()
-{
-    // Set the viewport
-    const IntRect viewport = getViewport(m_view);
-    const int     top      = static_cast<int>(getSize().y) - (viewport.top + viewport.height);
-    glCheck(glViewport(viewport.left, top, viewport.width, viewport.height));
-
-    // Set the projection matrix
-    glCheck(glMatrixMode(GL_PROJECTION));
-    glCheck(glLoadMatrixf(m_view.getTransform().getMatrix()));
-
-    // Go back to model-view mode
-    glCheck(glMatrixMode(GL_MODELVIEW));
+    // Initialise OpenGL state
+    m_fallbackShader = std::make_unique<Shader>();
+    if (!m_fallbackShader->loadFromMemory("#version 410 core\n"
+                                          "layout (location = 0) in vec2 vPosition;\n"
+                                          "layout (location = 1) in vec4 vColor;\n"
+                                          "layout (location = 2) in vec2 vTexCoords;\n"
+                                          "\n"
+                                          "out vec2 fTexCoords;\n"
+                                          "out vec4 fColor;\n"
+                                          "\n"
+                                          "uniform mat4 viewport;\n"
+                                          "\n"
+                                          "void main()\n"
+                                          "{\n"
+                                          "    gl_Position = viewport * vec4(vPosition, 0.0, 0.0);\n"
+                                          "    fTexCoords = vTexCoords;"
+                                          "}\n",
+                                          "#version 410 core\n"
+                                          "in vec2 fTexCoords;\n"
+                                          "in vec4 fColor;\n"
+                                          "\n"
+                                          "out vec4 fragColor;\n"
+                                          "\n"
+                                          "void main()\n"
+                                          "{\n"
+                                          "  fragColor = fColor;\n"
+                                          "}\n")) {
+        sf::err() << "Failed to compile default shaders" << std::endl;
+    }
+    // TODO texture, colour
+    setDefaultShader();
 }
 
 
@@ -524,138 +529,179 @@ void RenderTarget::applyBlendMode(const BlendMode& mode)
     using RenderTargetImpl::equationToGlConstant;
     using RenderTargetImpl::factorToGlConstant;
 
-    // Apply the blend mode, falling back to the non-separate versions if necessary
-    if (GLEXT_blend_func_separate)
-    {
-        glCheck(GLEXT_glBlendFuncSeparate(factorToGlConstant(mode.colorSrcFactor),
-                                          factorToGlConstant(mode.colorDstFactor),
-                                          factorToGlConstant(mode.alphaSrcFactor),
-                                          factorToGlConstant(mode.alphaDstFactor)));
-    }
-    else
-    {
-        glCheck(glBlendFunc(factorToGlConstant(mode.colorSrcFactor), factorToGlConstant(mode.colorDstFactor)));
-    }
-
-    if (GLEXT_blend_minmax || GLEXT_blend_subtract)
-    {
-        if (GLEXT_blend_equation_separate)
-        {
-            glCheck(GLEXT_glBlendEquationSeparate(equationToGlConstant(mode.colorEquation),
-                                                  equationToGlConstant(mode.alphaEquation)));
-        }
-        else
-        {
-            glCheck(GLEXT_glBlendEquation(equationToGlConstant(mode.colorEquation)));
-        }
-    }
-    else if ((mode.colorEquation != BlendMode::Add) || (mode.alphaEquation != BlendMode::Add))
-    {
-        static bool warned = false;
-
-        if (!warned)
-        {
-#ifdef SFML_OPENGL_ES
-            err() << "OpenGL ES extension OES_blend_subtract unavailable" << std::endl;
-#else
-            err() << "OpenGL extension EXT_blend_minmax and EXT_blend_subtract unavailable" << std::endl;
-#endif
-            err() << "Selecting a blend equation not possible" << '\n'
-                  << "Ensure that hardware acceleration is enabled if available" << std::endl;
-
-            warned = true;
-        }
-    }
-}
-
-
-////////////////////////////////////////////////////////////
-void RenderTarget::applyTransform(const Transform& transform)
-{
-    // No need to call glMatrixMode(GL_MODELVIEW), it is always the
-    // current mode (for optimization purpose, since it's the most used)
-    if (transform == Transform::Identity)
-        glCheck(glLoadIdentity());
-    else
-        glCheck(glLoadMatrixf(transform.getMatrix()));
-}
-
-
-////////////////////////////////////////////////////////////
-void RenderTarget::applyTexture(const Texture* texture)
-{
-    Texture::bind(texture, Texture::Pixels);
-}
-
-
-////////////////////////////////////////////////////////////
-void RenderTarget::applyShader(const Shader* shader)
-{
-    Shader::bind(shader);
-}
-
-
-////////////////////////////////////////////////////////////
-void RenderTarget::setupDraw(const RenderStates& states)
-{
-    // Enable or disable sRGB encoding
-    // This is needed for drivers that do not check the format of the surface drawn to before applying sRGB conversion
-    if (isSrgb())
-        glCheck(glEnable(GL_FRAMEBUFFER_SRGB));
-    else
-        glCheck(glDisable(GL_FRAMEBUFFER_SRGB));
-
-    // First set the persistent OpenGL states if it's the very first call
-    resetGLStates();
-
-    applyTransform(states.transform);
-
-    // Apply the view
-    applyCurrentView();
-
     // Apply the blend mode
-    applyBlendMode(states.blendMode);
+    glCheck(glBlendFuncSeparate(factorToGlConstant(mode.colorSrcFactor),
+                                      factorToGlConstant(mode.colorDstFactor),
+                                      factorToGlConstant(mode.alphaSrcFactor),
+                                      factorToGlConstant(mode.alphaDstFactor)));
 
-    // Apply the texture
 
-    // If the texture is an FBO attachment, always rebind it
-    // in order to inform the OpenGL driver that we want changes
-    // made to it in other contexts to be visible here as well
-    // This saves us from having to call glFlush() in
-    // RenderTextureImplFBO which can be quite costly
-    // See: https://www.khronos.org/opengl/wiki/Memory_Model
-    applyTexture(states.texture);
-
-    // Apply the shader
-    if (states.shader)
-        applyShader(states.shader);
+    glCheck(glBlendEquationSeparate(equationToGlConstant(mode.colorEquation),
+                                          equationToGlConstant(mode.alphaEquation)));
 }
 
 
 ////////////////////////////////////////////////////////////
-void RenderTarget::drawPrimitives(PrimitiveType type, std::size_t firstVertex, std::size_t vertexCount)
-{
-    std::cout << "Target draw primitives " << vertexCount << std::endl;
-    // Find the OpenGL primitive type
-    static constexpr GLenum modes[] = {GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN};
-    const GLenum            mode = modes[static_cast<std::size_t>(type)];
+RenderTarget::StepState::StepState(PrimitiveType ptype, const RenderStates& rstates)
+: type(ptype)
+, blendMode(rstates.blendMode)
+, texture(rstates.texture)
+, shader(rstates.shader)
+{}
 
-    // Draw the primitives
-    glCheck(glDrawArrays(mode, static_cast<GLint>(firstVertex), static_cast<GLsizei>(vertexCount)));
+
+////////////////////////////////////////////////////////////
+bool RenderTarget::StepState::operator==(const StepState& other) const
+{
+    return type == other.type &&
+           blendMode == other.blendMode &&
+           texture == other.texture &&
+           shader == other.shader;
 }
 
 
 ////////////////////////////////////////////////////////////
-void RenderTarget::cleanupDraw(const RenderStates& states)
+bool RenderTarget::StepState::operator!=(const StepState& other) const
 {
-    // Unbind the shader, if any
-    if (states.shader)
-        applyShader(nullptr);
-
-    // If the texture we used to draw belonged to a RenderTexture, then forcibly unbind that texture.
-    // This prevents a bug where some drivers do not clear RenderTextures properly.
-    if (states.texture && states.texture->m_fboAttachment)
-        applyTexture(nullptr);
+    return !(*this == other);
 }
+
+
+////////////////////////////////////////////////////////////
+RenderTarget::DrawStep::DrawStep(StepState state)
+: state(state)
+, vbo{0}
+, vao{0}
+, ebo{0}
+, overruled{false}
+{}
+
+
+////////////////////////////////////////////////////////////
+RenderTarget::DrawStep::DrawStep()
+: state{PrimitiveType::Points, RenderStates::Default}
+, vbo{0}
+, vao{0}
+, ebo{0}
+, overruled{false}
+{}
+
+
+////////////////////////////////////////////////////////////
+RenderTarget::DrawStep::DrawStep(DrawStep&& right)
+: state{right.state}
+, vertices{right.vertices}
+, elements{right.elements}
+, vbo{right.vbo}
+, ebo{right.ebo}
+, vao{right.vao}
+, overruled{right.overruled}
+{
+    right.vbo = 0;
+    right.ebo = 0;
+    right.vao = 0;
+}
+
+
+////////////////////////////////////////////////////////////
+RenderTarget::DrawStep& RenderTarget::DrawStep::operator=(DrawStep&& right) {
+    state = right.state;
+    vertices = right.vertices;
+    elements = right.elements;
+    vbo = right.vbo;
+    ebo = right.ebo;
+    vao = right.vao;
+    overruled = right.overruled;
+
+    right.vbo = 0;
+    right.ebo = 0;
+    right.vao = 0;
+
+    return *this;
+}
+
+
+////////////////////////////////////////////////////////////
+RenderTarget::DrawStep::~DrawStep()
+{
+    if (vbo) {
+        glCheck(glDeleteBuffers(1, &vbo));
+    }
+
+    if (ebo) {
+        glCheck(glDeleteBuffers(1, &ebo));
+    }
+
+    if (vao) {
+        glCheck(glDeleteVertexArrays(1, &vao));
+    }
+}
+
+
+////////////////////////////////////////////////////////////
+void RenderTarget::DrawStep::upload() {
+    if (vbo) {
+        glCheck(glDeleteBuffers(1, &vbo));
+    }
+    glCheck(glGenBuffers(1, &vbo));
+
+    if (ebo) {
+        glCheck(glDeleteBuffers(1, &ebo));
+    }
+    glCheck(glGenBuffers(1, &ebo));
+
+    if (vao) {
+        glCheck(glDeleteVertexArrays(1, &vao));
+    }
+    glCheck(glGenVertexArrays(1, &vao));
+    glCheck(glBindVertexArray(vao));
+
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    glCheck(glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW));
+
+    glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
+    glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(unsigned int), elements.data(), GL_DYNAMIC_DRAW));
+
+    glCheck(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(0)));
+    glCheck(glEnableVertexAttribArray(0));
+    glCheck(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(2)));
+    glCheck(glEnableVertexAttribArray(1));
+    glCheck(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(6)));
+    glCheck(glEnableVertexAttribArray(2));
+}
+
+
+////////////////////////////////////////////////////////////
+void RenderTarget::clearOngoingStep() {
+    if (m_steps.size() > m_stepsIdx) {
+        if (m_steps[m_stepsIdx].state == m_currentStep.state &&
+            m_steps[m_stepsIdx].vertices == m_currentStep.vertices &&
+            m_steps[m_stepsIdx].elements == m_currentStep.elements) {
+            // contents already within, no need to upload anything
+
+            m_currentStep = DrawStep{};
+            m_stepsIdx++;
+
+            // skip over overruled steps
+            while (m_steps.size() > m_stepsIdx && m_steps[m_stepsIdx].overruled) {
+                m_stepsIdx++;
+            }
+        } else if (m_currentStep.vertices.size() && m_currentStep.elements.size()) {
+            // contents dont match, reset and push
+            // TODO cache instead of discard
+
+            m_steps.erase(m_steps.begin() + static_cast<int>(m_stepsIdx), m_steps.end());
+        }
+    }
+
+    if (m_currentStep.vertices.size() && m_currentStep.elements.size()) {
+        m_currentStep.upload();
+
+        m_steps.emplace_back(std::move(m_currentStep));
+        m_currentStep = DrawStep{};
+        m_stepsIdx++;
+    }
+}
+
 
 } // namespace sf

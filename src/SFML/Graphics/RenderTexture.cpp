@@ -26,8 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/RenderTexture.hpp>
-#include <SFML/Graphics/RenderTextureImplDefault.hpp>
-#include <SFML/Graphics/RenderTextureImplFBO.hpp>
+#include <SFML/Graphics/RenderTextureImpl.hpp>
 
 #include <SFML/System/Err.hpp>
 
@@ -61,20 +60,11 @@ bool RenderTexture::create(const Vector2u& size, const ContextSettings& settings
     // We disable smoothing by default for render textures
     setSmooth(false);
 
-    // Create the implementation
-    if (priv::RenderTextureImplFBO::isAvailable())
-    {
-        // Use frame-buffer object (FBO)
-        m_impl = std::make_unique<priv::RenderTextureImplFBO>();
+    // Use frame-buffer object (FBO)
+    m_impl = std::make_unique<priv::RenderTextureImpl>();
 
-        // Mark the texture as being a framebuffer object attachment
-        m_texture.m_fboAttachment = true;
-    }
-    else
-    {
-        // Use default implementation
-        m_impl = std::make_unique<priv::RenderTextureImplDefault>();
-    }
+    // Mark the texture as being a framebuffer object attachment
+    m_texture.m_fboAttachment = true;
 
     // Initialize the render texture
     if (!m_impl->create(size, m_texture.m_texture, settings))
@@ -90,14 +80,7 @@ bool RenderTexture::create(const Vector2u& size, const ContextSettings& settings
 ////////////////////////////////////////////////////////////
 unsigned int RenderTexture::getMaximumAntialiasingLevel()
 {
-    if (priv::RenderTextureImplFBO::isAvailable())
-    {
-        return priv::RenderTextureImplFBO::getMaximumAntialiasingLevel();
-    }
-    else
-    {
-        return priv::RenderTextureImplDefault::getMaximumAntialiasingLevel();
-    }
+    return priv::RenderTextureImpl::getMaximumAntialiasingLevel();
 }
 
 
@@ -150,11 +133,12 @@ bool RenderTexture::setActive(bool active)
 ////////////////////////////////////////////////////////////
 void RenderTexture::display()
 {
+    RenderTarget::flush();
+
     // Update the target texture
-    if (m_impl && (priv::RenderTextureImplFBO::isAvailable() || setActive(true)))
+    if (m_impl)
     {
         m_impl->updateTexture(m_texture.m_texture);
-        m_texture.m_pixelsFlipped = true;
         m_texture.invalidateMipmap();
     }
 }

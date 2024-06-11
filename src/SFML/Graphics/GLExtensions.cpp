@@ -61,7 +61,7 @@ void ensureExtensionsInit()
         initialized = true;
 
 #ifdef SFML_OPENGL_ES
-        gladLoadGLES1(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
+        gladLoadGLES2(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
 #else
         gladLoadGL(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
 #endif
@@ -70,31 +70,12 @@ void ensureExtensionsInit()
         int majorVersion = 0;
         int minorVersion = 0;
 
-        // Try the new way first
         glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-        if (glGetError() == GL_INVALID_ENUM)
+        if ((majorVersion < 4) || ((majorVersion == 4) && (minorVersion < 1)))
         {
-            // Try the old way
-            const GLubyte* version = glGetString(GL_VERSION);
-            if (version)
-            {
-                // The beginning of the returned string is "major.minor" (this is standard)
-                majorVersion = version[0] - '0';
-                minorVersion = version[2] - '0';
-            }
-            else
-            {
-                // Can't get the version number, assume 1.1
-                majorVersion = 1;
-                minorVersion = 1;
-            }
-        }
-
-        if ((majorVersion < 1) || ((majorVersion == 1) && (minorVersion < 1)))
-        {
-            err() << "sfml-graphics requires support for OpenGL 1.1 or greater" << '\n'
+            err() << "sfml-graphics requires support for OpenGL 4.1 or greater" << '\n'
                   << "Ensure that hardware acceleration is enabled if available" << std::endl;
         }
     }

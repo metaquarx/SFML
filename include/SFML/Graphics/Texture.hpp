@@ -53,16 +53,6 @@ class SFML_GRAPHICS_API Texture : GlResource
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief Types of texture coordinates that can be used for rendering
-    ///
-    ////////////////////////////////////////////////////////////
-    enum CoordinateType
-    {
-        Normalized, //!< Texture coordinates in range [0 .. 1]
-        Pixels      //!< Texture coordinates in range [0 .. size]
-    };
-
-    ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
     /// Creates an empty texture.
@@ -559,20 +549,10 @@ public:
     /// // draw OpenGL stuff that use no texture...
     /// \endcode
     ///
-    /// The \a coordinateType argument controls how texture
-    /// coordinates will be interpreted. If Normalized (the default), they
-    /// must be in range [0 .. 1], which is the default way of handling
-    /// texture coordinates with OpenGL. If Pixels, they must be given
-    /// in pixels (range [0 .. size]). This mode is used internally by
-    /// the graphics classes of SFML, it makes the definition of texture
-    /// coordinates more intuitive for the high-level API, users don't need
-    /// to compute normalized values.
-    ///
     /// \param texture Pointer to the texture to bind, can be null to use no texture
-    /// \param coordinateType Type of texture coordinates to use
     ///
     ////////////////////////////////////////////////////////////
-    static void bind(const Texture* texture, CoordinateType coordinateType = Normalized);
+    static void bind(const Texture* texture);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the maximum texture size allowed
@@ -592,21 +572,6 @@ private:
     friend class RenderTarget;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Get a valid image size according to hardware support
-    ///
-    /// This function checks whether the graphics driver supports
-    /// non power of two sizes or not, and adjusts the size
-    /// accordingly.
-    /// The returned size is greater than or equal to the original size.
-    ///
-    /// \param size size to convert
-    ///
-    /// \return Valid nearest size (greater than or equal to specified size)
-    ///
-    ////////////////////////////////////////////////////////////
-    static unsigned int getValidSize(unsigned int size);
-
-    ////////////////////////////////////////////////////////////
     /// \brief Invalidate the mipmap if one exists
     ///
     /// This also resets the texture's minifying function.
@@ -618,13 +583,11 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Vector2u      m_size;            //!< Public texture size
-    Vector2u      m_actualSize;      //!< Actual texture size (can be greater than public size because of padding)
+    Vector2u      m_size;            //!< Texture size
     unsigned int  m_texture{};       //!< Internal texture identifier
     bool          m_isSmooth{};      //!< Status of the smooth filter
     bool          m_sRgb{};          //!< Should the texture source be converted from sRGB?
     bool          m_isRepeated{};    //!< Is the texture in repeat mode?
-    mutable bool  m_pixelsFlipped{}; //!< To work around the inconsistency in Y orientation
     bool          m_fboAttachment{}; //!< Is this texture owned by a framebuffer object?
     bool          m_hasMipmap{};     //!< Has the mipmap been generated?
     std::uint64_t m_cacheId;         //!< Unique number that identifies the texture to the render target's cache

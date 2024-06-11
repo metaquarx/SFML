@@ -43,9 +43,11 @@ struct ContextSettings
     ////////////////////////////////////////////////////////////
     enum Attribute
     {
-        Default = 0,      //!< Non-debug, compatibility context (this and the core attribute are mutually exclusive)
-        Core    = 1 << 0, //!< Core attribute
-        Debug   = 1 << 2  //!< Debug attribute
+        Compatibility = 0,      //!< Compatibility context (this and the core attribute are mutually exclusive)
+        Core          = 1 << 0, //!< Core attribute
+        Debug         = 1 << 2, //!< Debug attribute
+
+        Default = Core //!< Non-debug, core context
     };
 
     ////////////////////////////////////////////////////////////
@@ -64,7 +66,7 @@ struct ContextSettings
         unsigned int depth        = 0,
         unsigned int stencil      = 0,
         unsigned int antialiasing = 0,
-        unsigned int major        = 1,
+        unsigned int major        = 4,
         unsigned int minor        = 1,
         unsigned int attributes   = Default,
         bool         sRgb         = false) :
@@ -123,12 +125,12 @@ struct ContextSettings
 /// context should follow the core or compatibility profile
 /// of all newer (>= 3.2) OpenGL specifications. For versions
 /// 3.0 and 3.1 there is only the core profile. By default
-/// a compatibility context is created. You only need to specify
-/// the core flag if you want a core profile context to use with
-/// your own OpenGL rendering.
+/// a core context is created. You only need to specify
+/// the compatibility flag if you want a compatibility profile context to use
+/// with your own OpenGL rendering.
 /// <b>Warning: The graphics module will not function if you
-/// request a core profile context. Make sure the attributes are
-/// set to Default if you want to use the graphics module.</b>
+/// request a compatibility profile context. Make sure the attributes
+/// are set to Default if you want to use the graphics module.</b>
 ///
 /// Setting the debug attribute flag will request a context with
 /// additional debugging features enabled. Depending on the

@@ -156,6 +156,16 @@ public:
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool setActive(bool active = true) override;
 
+    ////////////////////////////////////////////////////////////
+    /// \brief Display on screen what has been rendered to the window so far
+    ///
+    /// This function is typically called after all OpenGL rendering
+    /// has been done for the current frame, in order to show
+    /// it on screen.
+    ///
+    ////////////////////////////////////////////////////////////
+    void display() override;
+
 protected:
     ////////////////////////////////////////////////////////////
     /// \brief Function called after the window has been created

@@ -265,43 +265,19 @@ struct GlContext::SharedContext
 
         auto glGetStringiFunc = reinterpret_cast<glGetStringiFuncType>(getFunction("glGetStringi"));
 
-        if (glGetErrorFunc() == GL_INVALID_ENUM || !majorVersion || !glGetStringiFunc)
+        int numExtensions = 0;
+        glGetIntegervFunc(GL_NUM_EXTENSIONS, &numExtensions);
+
+        if (numExtensions)
         {
-            // Try to load the < 3.0 way
-            const char* extensionString = reinterpret_cast<const char*>(glGetStringFunc(GL_EXTENSIONS));
+            extensions.clear();
 
-            if (extensionString)
+            for (unsigned int i = 0; i < static_cast<unsigned int>(numExtensions); ++i)
             {
-                extensions.clear();
+                const char* extensionString = reinterpret_cast<const char*>(glGetStringiFunc(GL_EXTENSIONS, i));
 
-                do
-                {
-                    const char* extension = extensionString;
-
-                    while (*extensionString && (*extensionString != ' '))
-                        ++extensionString;
-
-                    extensions.emplace_back(extension, extensionString);
-                } while (*extensionString++);
-            }
-        }
-        else
-        {
-            // Try to load the >= 3.0 way
-            int numExtensions = 0;
-            glGetIntegervFunc(GL_NUM_EXTENSIONS, &numExtensions);
-
-            if (numExtensions)
-            {
-                extensions.clear();
-
-                for (unsigned int i = 0; i < static_cast<unsigned int>(numExtensions); ++i)
-                {
-                    const char* extensionString = reinterpret_cast<const char*>(glGetStringiFunc(GL_EXTENSIONS, i));
-
-                    if (extensionString)
-                        extensions.emplace_back(extensionString);
-                }
+                if (extensionString)
+                    extensions.emplace_back(extensionString);
             }
         }
     }
@@ -890,7 +866,6 @@ void GlContext::initialize(const ContextSettings& requestedSettings)
     int majorVersion = 0;
     int minorVersion = 0;
 
-    // Try the new way first
     auto glGetIntegervFunc = reinterpret_cast<glGetIntegervFuncType>(getFunction("glGetIntegerv"));
     auto glGetErrorFunc    = reinterpret_cast<glGetErrorFuncType>(getFunction("glGetError"));
     auto glGetStringFunc   = reinterpret_cast<glGetStringFuncType>(getFunction("glGetString"));
@@ -899,67 +874,15 @@ void GlContext::initialize(const ContextSettings& requestedSettings)
 
     if (!glGetIntegervFunc || !glGetErrorFunc || !glGetStringFunc || !glEnableFunc || !glIsEnabledFunc)
     {
-        err() << "Could not load necessary function to initialize OpenGL context" << std::endl;
+        err() << "Could not load necessary functions to initialize OpenGL context" << std::endl;
         return;
     }
 
     glGetIntegervFunc(GL_MAJOR_VERSION, &majorVersion);
     glGetIntegervFunc(GL_MINOR_VERSION, &minorVersion);
 
-    if (glGetErrorFunc() != GL_INVALID_ENUM)
-    {
-        m_settings.majorVersion = static_cast<unsigned int>(majorVersion);
-        m_settings.minorVersion = static_cast<unsigned int>(minorVersion);
-    }
-    else
-    {
-        // Try the old way
-
-        // If we can't get the version number, assume 1.1
-        m_settings.majorVersion = 1;
-        m_settings.minorVersion = 1;
-
-        const char* version = reinterpret_cast<const char*>(glGetStringFunc(GL_VERSION));
-        if (version)
-        {
-            // OpenGL ES Common Lite profile: The beginning of the returned string is "OpenGL ES-CL major.minor"
-            // OpenGL ES Common profile:      The beginning of the returned string is "OpenGL ES-CM major.minor"
-            // OpenGL ES Full profile:        The beginning of the returned string is "OpenGL ES major.minor"
-            // Desktop OpenGL:                The beginning of the returned string is "major.minor"
-
-            // Helper to parse OpenGL version strings
-            static const auto parseVersionString =
-                [](const char* versionString, const char* prefix, unsigned int& major, unsigned int& minor)
-            {
-                const std::size_t prefixLength = std::strlen(prefix);
-
-                if ((std::strlen(versionString) >= (prefixLength + 3)) &&
-                    (std::strncmp(versionString, prefix, prefixLength) == 0) && std::isdigit(versionString[prefixLength]) &&
-                    (versionString[prefixLength + 1] == '.') && std::isdigit(versionString[prefixLength + 2]))
-                {
-                    major = static_cast<unsigned int>(versionString[prefixLength] - '0');
-                    minor = static_cast<unsigned int>(versionString[prefixLength + 2] - '0');
-
-                    return true;
-                }
-
-                return false;
-            };
-
-            if (!parseVersionString(version, "OpenGL ES-CL ", m_settings.majorVersion, m_settings.minorVersion) &&
-                !parseVersionString(version, "OpenGL ES-CM ", m_settings.majorVersion, m_settings.minorVersion) &&
-                !parseVersionString(version, "OpenGL ES ", m_settings.majorVersion, m_settings.minorVersion) &&
-                !parseVersionString(version, "", m_settings.majorVersion, m_settings.minorVersion))
-            {
-                err() << "Unable to parse OpenGL version string: " << std::quoted(version) << ", defaulting to 1.1"
-                      << std::endl;
-            }
-        }
-        else
-        {
-            err() << "Unable to retrieve OpenGL version string, defaulting to 1.1" << std::endl;
-        }
-    }
+    m_settings.majorVersion = static_cast<unsigned int>(majorVersion);
+    m_settings.minorVersion = static_cast<unsigned int>(minorVersion);
 
     // 3.0 contexts only deprecate features, but do not remove them yet
     // 3.1 contexts remove features if ARB_compatibility is not present

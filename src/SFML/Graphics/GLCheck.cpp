@@ -70,20 +70,6 @@ void glCheckError(const std::filesystem::path& file, unsigned int line, std::str
                 break;
             }
 
-            case GL_STACK_OVERFLOW:
-            {
-                error       = "GL_STACK_OVERFLOW";
-                description = "This command would cause a stack overflow.";
-                break;
-            }
-
-            case GL_STACK_UNDERFLOW:
-            {
-                error       = "GL_STACK_UNDERFLOW";
-                description = "This command would cause a stack underflow.";
-                break;
-            }
-
             case GL_OUT_OF_MEMORY:
             {
                 error       = "GL_OUT_OF_MEMORY";
@@ -91,7 +77,7 @@ void glCheckError(const std::filesystem::path& file, unsigned int line, std::str
                 break;
             }
 
-            case GLEXT_GL_INVALID_FRAMEBUFFER_OPERATION:
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
             {
                 error       = "GL_INVALID_FRAMEBUFFER_OPERATION";
                 description = "The object bound to FRAMEBUFFER_BINDING is not \"framebuffer complete\".";

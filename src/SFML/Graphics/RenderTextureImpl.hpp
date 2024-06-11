@@ -29,44 +29,52 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/System/Vector2.hpp>
 
+#include <SFML/Window/GlResource.hpp>
+
+#include <memory>
+#include <unordered_map>
+
 
 namespace sf
 {
-
+class Context;
 struct ContextSettings;
+
 
 namespace priv
 {
 ////////////////////////////////////////////////////////////
-/// \brief Abstract base class for render-texture implementations
+/// \brief Implementation of a RenderTexture
 ///
 ////////////////////////////////////////////////////////////
-class RenderTextureImpl
+class RenderTextureImpl : public GlResource
 {
 public:
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
     ////////////////////////////////////////////////////////////
-    RenderTextureImpl() = default;
+    RenderTextureImpl();
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
     ///
     ////////////////////////////////////////////////////////////
-    virtual ~RenderTextureImpl() = default;
+    ~RenderTextureImpl();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Deleted copy constructor
+    /// \brief Get the maximum anti-aliasing level supported by the system
+    ///
+    /// \return The maximum anti-aliasing level supported by the system
     ///
     ////////////////////////////////////////////////////////////
-    RenderTextureImpl(const RenderTextureImpl&) = delete;
+    static unsigned int getMaximumAntialiasingLevel();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Deleted copy assignment
+    /// \brief Unbind the currently bound FBO
     ///
     ////////////////////////////////////////////////////////////
-    RenderTextureImpl& operator=(const RenderTextureImpl&) = delete;
+    static void unbind();
 
     ////////////////////////////////////////////////////////////
     /// \brief Create the render texture implementation
@@ -78,7 +86,15 @@ public:
     /// \return True if creation has been successful
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool create(const Vector2u& size, unsigned int textureId, const ContextSettings& settings) = 0;
+    bool create(const Vector2u& size, unsigned int textureId, const ContextSettings& settings);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create an FBO in the current context
+    ///
+    /// \return True if creation has been successful
+    ///
+    ////////////////////////////////////////////////////////////
+    bool createFrameBuffer();
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate or deactivate the render texture for rendering
@@ -88,7 +104,7 @@ public:
     /// \return True on success, false on failure
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool activate(bool active) = 0;
+    bool activate(bool active);
 
     ////////////////////////////////////////////////////////////
     /// \brief Tell if the render-texture will use sRGB encoding when drawing on it
@@ -99,7 +115,7 @@ public:
     /// \return True if the render-texture use sRGB encoding, false otherwise
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool isSrgb() const = 0;
+    bool isSrgb() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the pixels of the target texture
@@ -107,7 +123,25 @@ public:
     /// \param textureId OpenGL identifier of the target texture
     ///
     ////////////////////////////////////////////////////////////
-    virtual void updateTexture(unsigned int textureId) = 0;
+    void updateTexture(unsigned textureId);
+
+    ////////////////////////////////////////////////////////////
+    // Member data
+    ////////////////////////////////////////////////////////////
+    struct FrameBufferObject;
+
+    using FrameBufferObjectMap = std::unordered_map<std::uint64_t, std::weak_ptr<FrameBufferObject>>;
+
+    FrameBufferObjectMap m_frameBuffers; //!< OpenGL frame buffer objects per context
+    FrameBufferObjectMap m_multisampleFrameBuffers; //!< Optional per-context OpenGL frame buffer objects with multisample attachments
+    unsigned int             m_depthStencilBuffer{}; //!< Optional depth/stencil buffer attached to the frame buffer
+    unsigned int             m_colorBuffer{};        //!< Optional multisample color buffer attached to the frame buffer
+    Vector2u                 m_size;                 //!< Width and height of the attachments
+    std::unique_ptr<Context> m_context;              //!< Backup OpenGL context, used when none already exist
+    unsigned int             m_textureId{};          //!< The ID of the texture to attach to the FBO
+    bool                     m_multisample{};        //!< Whether we have to create a multisample frame buffer as well
+    bool                     m_stencil{};            //!< Whether we have stencil attachment
+    bool                     m_sRgb{};               //!< Whether we need to encode drawn pixels into sRGB color space
 };
 
 } // namespace priv

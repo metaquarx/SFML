@@ -27,7 +27,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/Image.hpp>
-#include <SFML/Graphics/RenderTextureImplFBO.hpp>
+#include <SFML/Graphics/RenderTextureImpl.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -90,11 +90,11 @@ bool RenderWindow::setActive(bool active)
     if (result)
         result = RenderTarget::setActive(active);
 
-    // If FBOs are available, make sure none are bound when we
+    // Make sure no FBOs are bound when we
     // try to draw to the default framebuffer of the RenderWindow
-    if (active && result && priv::RenderTextureImplFBO::isAvailable())
+    if (active && result)
     {
-        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, m_defaultFrameBuffer));
+        glCheck(glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFrameBuffer));
 
         return true;
     }
@@ -104,14 +104,20 @@ bool RenderWindow::setActive(bool active)
 
 
 ////////////////////////////////////////////////////////////
+void RenderWindow::display() {
+    RenderTarget::flush();
+    Window::display();
+}
+
+
+////////////////////////////////////////////////////////////
 void RenderWindow::onCreate()
 {
-    if (priv::RenderTextureImplFBO::isAvailable())
-    {
-        // Retrieve the framebuffer ID we have to bind when targeting the window for rendering
-        // We assume that this window's context is still active at this point
-        glCheck(glGetIntegerv(GLEXT_GL_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&m_defaultFrameBuffer)));
-    }
+    priv::ensureExtensionsInit();
+
+    // Retrieve the framebuffer ID we have to bind when targeting the window for rendering
+    // We assume that this window's context is still active at this point
+    glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&m_defaultFrameBuffer)));
 
     // Just initialize the render target part
     RenderTarget::initialize();

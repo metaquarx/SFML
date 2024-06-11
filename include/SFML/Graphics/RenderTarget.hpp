@@ -38,6 +38,8 @@
 #include <SFML/Graphics/View.hpp>
 
 #include <cstddef>
+#include <vector>
+#include <memory>
 
 
 namespace sf
@@ -57,7 +59,7 @@ public:
     /// \brief Destructor
     ///
     ////////////////////////////////////////////////////////////
-    virtual ~RenderTarget() = default;
+    virtual ~RenderTarget();
 
     ////////////////////////////////////////////////////////////
     /// \brief Deleted copy constructor
@@ -324,79 +326,29 @@ public:
     [[nodiscard]] virtual bool setActive(bool active = true);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Save the current OpenGL render states and matrices
+    /// \brief Set the default shader
     ///
-    /// This function can be used when you mix SFML drawing
-    /// and direct OpenGL rendering. Combined with popGLStates,
-    /// it ensures that:
-    /// \li SFML's internal states are not messed up by your OpenGL code
-    /// \li your OpenGL states are not modified by a call to a SFML function
+    /// This function sets the default shader to use, when one isn't
+    /// specified in the draw-call's RenderStates.
     ///
-    /// More specifically, it must be used around code that
-    /// calls Draw functions. Example:
-    /// \code
-    /// // OpenGL code here...
-    /// window.pushGLStates();
-    /// window.draw(...);
-    /// window.draw(...);
-    /// window.popGLStates();
-    /// // OpenGL code here...
-    /// \endcode
+    /// If nullptr is passed, the internal fallback shader will be used
     ///
-    /// Note that this function is quite expensive: it saves all the
-    /// possible OpenGL states and matrices, even the ones you
-    /// don't care about. Therefore it should be used wisely.
-    /// It is provided for convenience, but the best results will
-    /// be achieved if you handle OpenGL states yourself (because
-    /// you know which states have really changed, and need to be
-    /// saved and restored). Take a look at the resetGLStates
-    /// function if you do so.
-    ///
-    /// \see popGLStates
+    /// \param shader Default shader to use
     ///
     ////////////////////////////////////////////////////////////
-    void pushGLStates();
+    void setDefaultShader(Shader* shader = nullptr);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Restore the previously saved OpenGL render states and matrices
-    ///
-    /// See the description of pushGLStates to get a detailed
-    /// description of these functions.
-    ///
-    /// \see pushGLStates
-    ///
+    /// \brief Flush the draw queue
     ////////////////////////////////////////////////////////////
-    void popGLStates();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Reset the internal OpenGL states so that the target is ready for drawing
-    ///
-    /// This function can be used when you mix SFML drawing
-    /// and direct OpenGL rendering, if you choose not to use
-    /// pushGLStates/popGLStates. It makes sure that all OpenGL
-    /// states needed by SFML are set, so that subsequent draw()
-    /// calls will work as expected.
-    ///
-    /// Example:
-    /// \code
-    /// // OpenGL code here...
-    /// glPushAttrib(...);
-    /// window.resetGLStates();
-    /// window.draw(...);
-    /// window.draw(...);
-    /// glPopAttrib(...);
-    /// // OpenGL code here...
-    /// \endcode
-    ///
-    ////////////////////////////////////////////////////////////
-    void resetGLStates();
+    void flush();
 
 protected:
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
     ////////////////////////////////////////////////////////////
-    RenderTarget() = default;
+    RenderTarget();
 
     ////////////////////////////////////////////////////////////
     /// \brief Performs the common initialization step after creation
@@ -409,12 +361,6 @@ protected:
 
 private:
     ////////////////////////////////////////////////////////////
-    /// \brief Apply the current view
-    ///
-    ////////////////////////////////////////////////////////////
-    void applyCurrentView();
-
-    ////////////////////////////////////////////////////////////
     /// \brief Apply a new blending mode
     ///
     /// \param mode Blending mode to apply
@@ -423,62 +369,53 @@ private:
     void applyBlendMode(const BlendMode& mode);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Apply a new transform
-    ///
-    /// \param transform Transform to apply
-    ///
-    ////////////////////////////////////////////////////////////
-    void applyTransform(const Transform& transform);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Apply a new texture
-    ///
-    /// \param texture Texture to apply
-    ///
-    ////////////////////////////////////////////////////////////
-    void applyTexture(const Texture* texture);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Apply a new shader
-    ///
-    /// \param shader Shader to apply
-    ///
-    ////////////////////////////////////////////////////////////
-    void applyShader(const Shader* shader);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Setup environment for drawing
-    ///
-    /// \param states         Render states to use for drawing
-    ///
-    ////////////////////////////////////////////////////////////
-    void setupDraw(const RenderStates& states);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Draw the primitives
-    ///
-    /// \param type        Type of primitives to draw
-    /// \param firstVertex Index of the first vertex to use when drawing
-    /// \param vertexCount Number of vertices to use when drawing
-    ///
-    ////////////////////////////////////////////////////////////
-    void drawPrimitives(PrimitiveType type, std::size_t firstVertex, std::size_t vertexCount);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Clean up environment after drawing
-    ///
-    /// \param states Render states used for drawing
-    ///
-    ////////////////////////////////////////////////////////////
-    void cleanupDraw(const RenderStates& states);
-
-
-    ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
     View          m_defaultView; //!< Default view
     View          m_view;        //!< Current view
     std::uint64_t m_id{};        //!< Unique number that identifies the RenderTarget
+
+    std::unique_ptr<Shader> m_fallbackShader; //!< Fallback shader, when the user doesn't provide one
+    Shader* m_defaultShader;                  //!< Shader to use when one isn't specified by the RenderStates
+
+    struct StepState {
+        StepState(PrimitiveType pType, const RenderStates& rStates);
+        PrimitiveType type;
+        BlendMode blendMode;
+        const Texture* texture;
+        const Shader* shader;
+
+        bool operator==(const StepState& other) const;
+        bool operator!=(const StepState& other) const;
+    };
+
+    struct DrawStep {
+        DrawStep(StepState state);
+        DrawStep();
+        DrawStep(const DrawStep&) = delete; // copy
+        DrawStep& operator=(const DrawStep&) = delete; // copy
+        DrawStep(DrawStep&& right);
+        DrawStep& operator=(DrawStep&& right);
+        ~DrawStep();
+
+        void upload();
+
+        StepState state; //!< Current state
+
+        std::vector<float> vertices;        //!< Vertices in xy, rgba, st format
+        std::vector<unsigned int> elements; //!< Element indices
+
+        unsigned int vbo;            //!< Vertex Buffer
+        unsigned int ebo;            //!< Element buffer
+        unsigned int vao;            //!< Vertex array identifier, or 0
+
+
+        bool overruled; //!< Buffer is user-provided
+    };
+    std::vector<DrawStep> m_steps; //!< Draw stack
+    std::size_t m_stepsIdx;        //!< Current index into draw stack
+    DrawStep m_currentStep;  //!< Currently editing draw step
+    void clearOngoingStep(); //!< Push current draw step to stack
 };
 
 } // namespace sf
